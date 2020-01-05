@@ -1,0 +1,15 @@
+(library
+ (name quickjs)
+ (public_name quickjs)
+ (foreign_stubs
+  (language c)
+  (names quickjs_stubs)
+  (flags -I/path/to/quickjs))
+ (libraries quickjs_bindings ctypes.stubs ctypes))
+
+(rule
+ (targets quickjs_generated.ml quickjs_stubs.c)
+ (deps
+  (:first_dep ../gen/quickjs_gen.exe))
+ (action
+  (bash ./%{first_dep})))
