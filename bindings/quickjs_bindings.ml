@@ -1,9 +1,7 @@
 open Ctypes
 
-module C (F : Cstubs.FOREIGN) = struct
+module Make (F : Cstubs.FOREIGN) = struct
   open F
-
-  let const x = x
 
   type jscontext
 

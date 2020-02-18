@@ -1,2 +1,1 @@
-open! Ctypes
-module Raw = Quickjs_bindings.C (Quickjs_stubs)
+include Quickjs_bindings.Make (Quickjs_stubs)
