@@ -1,1 +1,1 @@
-include Quickjs_bindings.Make (Quickjs_stubs)
+module C = Quickjs_bindings.Make (Quickjs_stubs)
