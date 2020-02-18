@@ -5,7 +5,8 @@
  (foreign_stubs
   (language c)
   (names quickjs_stubs)
-  (include_dirs ../vendor/quickjs)))
+  (include_dirs ../vendor/quickjs))
+ (foreign_archives ../vendor/quickjs))
 
 (rule
  (targets quickjs_stubs.ml quickjs_stubs.c)

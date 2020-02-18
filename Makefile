@@ -24,4 +24,7 @@ install: release
 uninstall: release
 	opam remove .
 
-.PHONY: run build test clean fmt doc release install uninstall
+hack_quickjs_version:
+	sed -i.bak s/CONFIG_VERSION/\"$(shell cat vendor/quickjs/VERSION)\"/ vendor/quickjs/quickjs.c
+
+.PHONY: run build test clean fmt doc release install uninstall hack_quickjs_version

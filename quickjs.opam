@@ -10,8 +10,9 @@ bug-reports: "https://github.com/dhcmrlchtdj/ocaml-quickjs/issues"
 depends: [
   "ocaml" {>= "4.09.0"}
   "ctypes" {>= "0.16.0"}
-  "dune" {build & >= "2.0.0"}
-  "ocamlformat" {dev & >= "0.12"}
+  "ctypes-foreign" {>= "0.4.0"}
+  "dune" {build & >= "2.3.0"}
+  "ocamlformat" {dev & >= "0.13.0"}
 ]
 build: [
   ["dune" "subst"] {pinned}

@@ -15,8 +15,9 @@
  (depends
   (ocaml                (and (>= 4.09.0)))
   (ctypes               (and (>= 0.16.0)))
-  (dune                 (and :build (>= 2.0.0)))
-  (ocamlformat          (and :dev (>= 0.12)))
+  (ctypes-foreign       (and (>= 0.4.0)))
+  (dune                 (and :build (>= 2.3.0)))
+  (ocamlformat          (and :dev (>= 0.13.0)))
   ))
 
 (generate_opam_files true)
