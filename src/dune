@@ -4,7 +4,8 @@
  (foreign_stubs
   (language c)
   (names quickjs_stubs)
-  (flags -I/path/to/quickjs))
+  (flags -I/usr/local/Cellar/quickjs/2019-10-27/include/quickjs))
+ ; (c_library_flags (-l/usr/local/Cellar/quickjs/2019-10-27/include/quickjs/quickjs.h))
  (libraries quickjs_bindings ctypes.stubs ctypes))
 
 (rule
