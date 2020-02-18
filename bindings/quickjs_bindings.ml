@@ -3,13 +3,13 @@ open Ctypes
 module Make (F : Cstubs.FOREIGN) = struct
   open F
 
-  type jscontext
-
-  let jscontext : jscontext structure typ = structure "JSContext"
-
   type jsruntime
 
   let jsruntime : jsruntime structure typ = structure "JSRuntime"
+
+  type jscontext
+
+  let jscontext : jscontext structure typ = structure "JSContext"
 
   type jsvalue_union
 
@@ -60,4 +60,28 @@ module Make (F : Cstubs.FOREIGN) = struct
       @-> int
       @-> returning jsvalue
       )
+
+  (*
+   * JSRuntime
+   * JSContext
+   * JSValue
+   * JS_DupValue
+   * JS_FreeValue
+   * JS_NewCFunction
+   * JS_SetPropertyFunctionList
+   * JS_EXCEPTION
+   * JS_GetException
+   * JS_Eval
+   * js_std_eval_binary
+   * JS_NewClassID
+   * JS_NewClass
+   * JS_NewObjectClass
+   * JS_GetOpaque
+   * JS_SetOpaque
+   * JS_SetClassProto
+   * JS_SetMemoryLimit
+   * JS_NewRuntime2
+   * JS_SetMaxStackSize
+   * JS_SetInterruptHandler
+   *)
 end
