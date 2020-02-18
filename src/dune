@@ -1,16 +1,15 @@
 (library
- (name quickjs)
  (public_name quickjs)
+ (name quickjs)
+ (libraries ctypes ctypes.stubs quickjs_bindings)
  (foreign_stubs
   (language c)
   (names quickjs_stubs)
-  (flags -I/usr/local/Cellar/quickjs/2019-10-27/include/quickjs))
- ; (c_library_flags (-l/usr/local/Cellar/quickjs/2019-10-27/include/quickjs/quickjs.h))
- (libraries quickjs_bindings ctypes.stubs ctypes))
+  (include_dirs ../vendor/quickjs)))
 
 (rule
- (targets quickjs_generated.ml quickjs_stubs.c)
+ (targets quickjs_stubs.ml quickjs_stubs.c)
  (deps
-  (:first_dep ../gen/quickjs_gen.exe))
+  (:gen_stubs ../stubs/quickjs_gen.exe))
  (action
-  (bash ./%{first_dep})))
+  (run %{gen_stubs})))

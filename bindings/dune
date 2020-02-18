@@ -3,4 +3,3 @@
  (public_name quickjs.bindings)
  (libraries ctypes ctypes.stubs)
  (modules quickjs_bindings))
- ;;(virtual_deps conf-quickjs))
