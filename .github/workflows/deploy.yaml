@@ -22,6 +22,6 @@ jobs:
             - run: opam install . --deps-only
             - run: opam exec -- dune build @doc
             - uses: peaceiris/actions-gh-pages@v3.0.3
-              env:
+              with:
                   deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
                   publish_dir: ./_build/default/_doc/_html/
