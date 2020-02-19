@@ -1,4 +1,4 @@
-module C = Bindings.Make (Stubs)
+module C = Quickjs_raw
 
 type runtime = C.js_runtime Ctypes.structure Ctypes.ptr
 
