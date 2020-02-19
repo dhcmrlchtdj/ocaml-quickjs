@@ -49,10 +49,9 @@ module Make (F : Cstubs.FOREIGN) = struct
 
   (* --- *)
 
-  (* typedef JSValue JSCFunction(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv); *)
-  (* type js_c_function *)
   (* let js_c_function = *)
-  (*   funptr *)
+  (*   (* typedef JSValue JSCFunction(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv); *) *)
+  (*   Foreign.funptr *)
   (*     Ctypes.( *)
   (*       ptr js_context *)
   (*       @-> js_value_const *)
