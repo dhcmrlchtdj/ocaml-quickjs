@@ -1,34 +1,11 @@
 module C = Bindings.Make (Stubs)
 
 type runtime = C.js_runtime Ctypes.structure Ctypes.ptr
-(** JSRuntime represents a Javascript runtime corresponding to an object heap.
-    Several runtimes can exist at the same time but they cannot exchange objects.
-    Inside a given runtime, no multi-threading is supported.
-    *)
-
-let new_runtime () : runtime =
-  let rt = C.js_new_runtime () in
-  let () = Gc.finalise (fun rt -> C.js_free_runtime rt) rt in
-  rt
-
-(* --- *)
 
 type context = {
   rt: runtime;
   ctx: C.js_context Ctypes.structure Ctypes.ptr;
 }
-(** JSContext represents a Javascript context (or Realm). Each JSContext has
-    its own global objects and system objects. There can be several JSContexts
-    per JSRuntime and they can share objects, similar to frames of the same
-    origin sharing Javascript objects in a web browser.
-    *)
-
-let new_context (rt : runtime) : context =
-  let ctx = C.js_new_context rt in
-  let () = Gc.finalise (fun c -> C.js_free_context c) ctx in
-  { rt; ctx }
-
-(* --- *)
 
 type value = {
   ctx: context;
@@ -37,6 +14,16 @@ type value = {
 
 (* --- *)
 
+let new_runtime () : runtime =
+  let rt = C.js_new_runtime () in
+  let () = Gc.finalise (fun rt -> C.js_free_runtime rt) rt in
+  rt
+
+let new_context (rt : runtime) : context =
+  let ctx = C.js_new_context rt in
+  let () = Gc.finalise (fun c -> C.js_free_context c) ctx in
+  { rt; ctx }
+
 let get_exception (ctx : context) : string option =
   let ctx = ctx.ctx in
   let err = C.js_get_exception ctx in
@@ -44,8 +31,6 @@ let get_exception (ctx : context) : string option =
   if is_exn then Some (C.js_to_c_string ctx err) else None
 
 let get_exception_exn (ctx : context) : string = get_exception ctx |> Option.get
-
-(* --- *)
 
 module Value = struct
   let is_null v = C.js_is_null v.v = 1
@@ -112,13 +97,11 @@ module Value = struct
     let r = C.js_to_float64 v.ctx.ctx p v.v in
     if r >= 0 then Ok Ctypes.(!@p) else Error (get_exception_exn v.ctx)
 
-  let to_big_int64 v : (int64, string) result =
+  let to_bigint64 v : (int64, string) result =
     let p = Ctypes.(allocate int64_t 0L) in
-    let r = C.js_to_big_int64 v.ctx.ctx p v.v in
+    let r = C.js_to_bigint64 v.ctx.ctx p v.v in
     if r >= 0 then Ok Ctypes.(!@p) else Error (get_exception_exn v.ctx)
 end
-
-(* --- *)
 
 let eval (ctx : context) (script : string) : (value, string) result =
   let len = Unsigned.Size_t.of_int (String.length script) in

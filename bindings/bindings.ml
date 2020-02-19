@@ -268,7 +268,7 @@ module Make (F : Cstubs.FOREIGN) = struct
       "JS_ToFloat64"
       (ptr js_context @-> ptr double @-> js_value_const @-> returning int)
 
-  let js_to_big_int64 =
+  let js_to_bigint64 =
     foreign
       "JS_ToBigInt64"
       (ptr js_context @-> ptr int64_t @-> js_value_const @-> returning int)

@@ -4,9 +4,9 @@ an OCaml binding to [QuickJS](https://bellard.org/quickjs/quickjs.html).
 
 ## Usage
 
-- [example](https://github.com/dhcmrlchtdj/ocaml-quickjs/blob/master/test/example.ml)
+- [document](https://dhcmrlchtdj.github.io/ocaml-quickjs/index.html)
 
-- [document]()
+- [example](https://github.com/dhcmrlchtdj/ocaml-quickjs/blob/master/test/example.ml)
 
 ## License
 
