@@ -89,17 +89,13 @@ module Value = struct
 
   let to_int64 v : (int64, string) result =
     let p = Ctypes.(allocate int64_t 0L) in
-    let r = C.js_to_int64 v.ctx.ctx p v.v in
+    let fn = if is_big_int v then C.js_to_bigint64 else C.js_to_int64 in
+    let r = fn v.ctx.ctx p v.v in
     if r >= 0 then Ok Ctypes.(!@p) else Error (get_exception_exn v.ctx)
 
   let to_float v : (float, string) result =
     let p = Ctypes.(allocate double 0.0) in
     let r = C.js_to_float64 v.ctx.ctx p v.v in
-    if r >= 0 then Ok Ctypes.(!@p) else Error (get_exception_exn v.ctx)
-
-  let to_bigint64 v : (int64, string) result =
-    let p = Ctypes.(allocate int64_t 0L) in
-    let r = C.js_to_bigint64 v.ctx.ctx p v.v in
     if r >= 0 then Ok Ctypes.(!@p) else Error (get_exception_exn v.ctx)
 end
 

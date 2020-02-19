@@ -57,7 +57,6 @@ module Value : sig
 
   val to_float : value -> (float, string) result
 
-  val to_bigint64 : value -> (int64, string) result
 end
 
 val new_runtime : unit -> runtime
