@@ -123,6 +123,7 @@ end
 let eval (ctx : context) (script : string) : (value, string) result =
   let len = Unsigned.Size_t.of_int (String.length script) in
   let v = C.js_eval ctx.ctx script len "input.js" 0 in
+  let () = Gc.finalise (fun v -> C.js_free_value ctx.ctx v) v in
   let r = { ctx; v } in
   if Value.is_exception r then Error (get_exception_exn ctx) else Ok r
 
