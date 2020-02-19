@@ -278,8 +278,6 @@ module Make (F : Cstubs.FOREIGN) = struct
       "JS_ToString"
       (ptr js_context @-> js_value_const @-> returning js_value)
 
-  (* --- *)
-
   let js_to_c_string =
     foreign
       (* const char *JS_ToCString(JSContext *ctx, JSValueConst val1) *)
