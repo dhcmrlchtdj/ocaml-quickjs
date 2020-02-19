@@ -1,3 +1,3 @@
-(executables
- (names quickjs_gen)
- (libraries quickjs_bindings ctypes.stubs))
+(executable
+ (name gen)
+ (libraries ctypes.stubs bindings))

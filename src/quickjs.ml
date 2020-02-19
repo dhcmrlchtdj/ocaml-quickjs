@@ -1,4 +1,4 @@
-module C = Quickjs_bindings.Make (Quickjs_stubs)
+module C = Bindings.Make (Stubs)
 
 let to_sizet = Unsigned.Size_t.of_int
 

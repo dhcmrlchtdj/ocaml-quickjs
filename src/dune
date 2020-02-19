@@ -1,16 +1,16 @@
 (library
  (public_name quickjs)
  (name quickjs)
- (libraries quickjs_bindings)
+ (libraries bindings)
+ (foreign_archives ../vendor/quickjs)
  (foreign_stubs
   (language c)
-  (names quickjs_stubs)
-  (include_dirs ../vendor/quickjs))
- (foreign_archives ../vendor/quickjs))
+  (names stubs)
+  (include_dirs ../vendor/quickjs)))
 
 (rule
- (targets quickjs_stubs.ml quickjs_stubs.c)
+ (targets stubs.ml stubs.c)
  (deps
-  (:gen_stubs ../stubs/quickjs_gen.exe))
+  (:gen_stubs ../stubs/gen.exe))
  (action
   (run %{gen_stubs})))

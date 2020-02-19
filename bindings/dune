@@ -1,4 +1,4 @@
 (library
- (name quickjs_bindings)
  (public_name quickjs.bindings)
+ (name bindings)
  (libraries ctypes ctypes.stubs))
