@@ -11,7 +11,7 @@
 
 (package
  (name quickjs)
- (synopsis "OCaml bindings to quickjs")
+ (synopsis "Binding to QuickJS")
  (depends
   (ocaml                (and (>= 4.09.0)))
   (ctypes               (and (>= 0.16.0)))
