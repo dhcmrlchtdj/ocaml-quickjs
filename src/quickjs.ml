@@ -35,9 +35,17 @@ type value = {
   v: C.js_value Ctypes.structure;
 }
 
-let get_exception (ctx : context) : string =
+(* --- *)
+
+let get_exception (ctx : context) : string option =
   let ctx = ctx.ctx in
-  ctx |> C.js_get_exception |> C.js_to_string ctx |> C.js_to_c_string ctx
+  let err = C.js_get_exception ctx in
+  let is_exn = C.js_is_exception err = 1 in
+  if is_exn then Some (C.js_to_c_string ctx err) else None
+
+let get_exception_exn (ctx : context) : string = get_exception ctx |> Option.get
+
+(* --- *)
 
 module Value = struct
   let is_null v = C.js_is_null v.v = 1
@@ -82,32 +90,32 @@ module Value = struct
     match r with
       | 0 -> Ok false
       | 1 -> Ok true
-      | _ -> Error (get_exception v.ctx)
+      | _ -> Error (get_exception_exn v.ctx)
 
   let to_int32 v : (int32, string) result =
     let p = Ctypes.(allocate int32_t 0l) in
     let r = C.js_to_int32 v.ctx.ctx p v.v in
-    if r >= 0 then Ok Ctypes.(!@p) else Error (get_exception v.ctx)
+    if r >= 0 then Ok Ctypes.(!@p) else Error (get_exception_exn v.ctx)
 
   let to_uint32 v : (Unsigned.UInt32.t, string) result =
     let p = Ctypes.(allocate uint32_t Unsigned.UInt32.zero) in
     let r = C.js_to_uint32 v.ctx.ctx p v.v in
-    if r >= 0 then Ok Ctypes.(!@p) else Error (get_exception v.ctx)
+    if r >= 0 then Ok Ctypes.(!@p) else Error (get_exception_exn v.ctx)
 
   let to_int64 v : (int64, string) result =
     let p = Ctypes.(allocate int64_t 0L) in
     let r = C.js_to_int64 v.ctx.ctx p v.v in
-    if r >= 0 then Ok Ctypes.(!@p) else Error (get_exception v.ctx)
+    if r >= 0 then Ok Ctypes.(!@p) else Error (get_exception_exn v.ctx)
 
   let to_float v : (float, string) result =
     let p = Ctypes.(allocate double 0.0) in
     let r = C.js_to_float64 v.ctx.ctx p v.v in
-    if r >= 0 then Ok Ctypes.(!@p) else Error (get_exception v.ctx)
+    if r >= 0 then Ok Ctypes.(!@p) else Error (get_exception_exn v.ctx)
 
   let to_big_int64 v : (int64, string) result =
     let p = Ctypes.(allocate int64_t 0L) in
     let r = C.js_to_big_int64 v.ctx.ctx p v.v in
-    if r >= 0 then Ok Ctypes.(!@p) else Error (get_exception v.ctx)
+    if r >= 0 then Ok Ctypes.(!@p) else Error (get_exception_exn v.ctx)
 end
 
 (* --- *)
@@ -115,4 +123,9 @@ end
 let eval (ctx : context) (script : string) : (value, string) result =
   let len = Unsigned.Size_t.of_int (String.length script) in
   let v = C.js_eval ctx.ctx script len "input.js" 0 in
-  Ok { ctx; v }
+  let r = { ctx; v } in
+  if Value.is_exception r then Error (get_exception_exn ctx) else Ok r
+
+let eval_once (script : string) : (value, string) result =
+  let ctx = new_runtime () |> new_context in
+  eval ctx script

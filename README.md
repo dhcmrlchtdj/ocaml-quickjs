@@ -2,12 +2,11 @@
 
 an OCaml binding to [QuickJS](https://bellard.org/quickjs/quickjs.html).
 
-**WIP**
-
 ## Usage
 
-- example
-- document
+- [example](https://github.com/dhcmrlchtdj/ocaml-quickjs/blob/master/test/example.ml)
+
+- [document]()
 
 ## License
 
