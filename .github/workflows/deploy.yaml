@@ -13,12 +13,12 @@ jobs:
             - uses: avsm/setup-ocaml@v1.0
               with:
                   ocaml-version: '4.09.0'
-            - uses: actions/cache@v1.1.2
-              with:
-                  path: ~/.opam/4.09.0/.opam-switch/sources
-                  key: opam-${{ runner.os }}-${{ hashFiles('dune-project') }}
-                  # restore-keys: |
-                  #     opam-${{ runner.os }}-
+            # - uses: actions/cache@v1.1.2
+            #   with:
+            #       path: ~/.opam/4.09.0/.opam-switch/sources
+            #       key: opam-${{ runner.os }}-${{ hashFiles('dune-project') }}
+            #       restore-keys: |
+            #           opam-${{ runner.os }}-
             - run: opam install . --deps-only
             - run: opam exec -- dune build @doc
             - uses: peaceiris/actions-gh-pages@v3.0.3
