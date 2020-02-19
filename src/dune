@@ -17,7 +17,5 @@
 
 (rule
  (targets stubs.ml stubs.c)
- (deps
-  (:gen_stubs ../stubs/gen.exe))
  (action
-  (run %{gen_stubs})))
+  (run ../stubs/gen.exe)))
