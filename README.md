@@ -1,6 +1,6 @@
 # QuickJS
 
-an OCaml binding to [QuickJS](https://bellard.org/quickjs/quickjs.html).
+OCaml bindings to [QuickJS](https://bellard.org/quickjs/quickjs.html).
 
 ## Usage
 
