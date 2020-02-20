@@ -5,6 +5,10 @@ module Make (F : Cstubs.FOREIGN) = struct
 
   (* --- *)
 
+  include Constants
+
+  (* --- *)
+
   type js_runtime
 
   let js_runtime : js_runtime structure typ = structure "JSRuntime"
@@ -49,23 +53,6 @@ module Make (F : Cstubs.FOREIGN) = struct
 
   (* --- *)
 
-  (* let js_c_function = *)
-  (*   (* typedef JSValue JSCFunction(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv); *) *)
-  (*   Foreign.funptr *)
-  (*     Ctypes.( *)
-  (*       ptr js_context *)
-  (*       @-> js_value_const *)
-  (*       @-> int *)
-  (*       @-> ptr js_value_const *)
-  (*       @-> returning js_value) *)
-
-  type js_c_function_list_entry
-
-  let js_c_function_list_entry : js_c_function_list_entry structure typ =
-    structure "JSCFunctionListEntry"
-
-  (* --- *)
-
   let js_new_runtime =
     (* JSRuntime *JS_NewRuntime(void) *)
     foreign "JS_NewRuntime" (void @-> returning (ptr js_runtime))
@@ -103,30 +90,6 @@ module Make (F : Cstubs.FOREIGN) = struct
   let js_set_max_stack_size =
     (* void JS_SetMaxStackSize(JSContext *ctx, size_t stack_size); *)
     foreign "JS_SetMaxStackSize" (ptr js_context @-> size_t @-> returning void)
-
-  (* --- *)
-
-  (* let js_new_c_function = *)
-  (*   (* JSValue JS_NewCFunction(JSContext *ctx, JSCFunction *func, const char *name, int length) *) *)
-  (*   foreign *)
-  (*     "JS_NewCFunction" *)
-  (*     (ptr js_context *)
-  (*     @-> ptr js_c_function *)
-  (*     @-> string *)
-  (*     @-> int *)
-  (*     @-> returning js_value *)
-  (*     ) *)
-
-  let js_set_property_function_list =
-    (* void JS_SetPropertyFunctionList(JSContext *ctx, JSValueConst obj, const JSCFunctionListEntry *tab, int len); *)
-    foreign
-      "JS_SetPropertyFunctionList"
-      (ptr js_context
-      @-> js_value_const
-      @-> ptr js_c_function_list_entry
-      @-> int
-      @-> returning void
-      )
 
   (* --- *)
 
@@ -171,6 +134,7 @@ module Make (F : Cstubs.FOREIGN) = struct
   JS_BOOL JS_IsBigFloat(JSValueConst v)
   JS_BOOL JS_IsBigDecimal(JSValueConst v)
   *)
+
   let js_is_uninitialized =
     foreign "JS_IsUninitialized" (js_value_const @-> returning js_bool)
 
@@ -359,8 +323,60 @@ module Make (F : Cstubs.FOREIGN) = struct
       @-> returning js_value
       )
 
+  let js_eval_function =
+    (* JSValue JS_EvalFunction(JSContext *ctx, JSValue fun_obj); *)
+    foreign
+      "JS_EvalFunction"
+      (ptr js_context @-> js_value @-> returning js_value)
+
   (* --- *)
 
-  (* typedef int JSInterruptHandler(JSRuntime *rt, void *opaque); *)
-  (* void JS_SetInterruptHandler(JSRuntime *rt, JSInterruptHandler *cb, void *opaque); *)
+  (* let js_c_function = *)
+  (*   (* typedef JSValue JSCFunction(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv); *) *)
+  (*   Foreign.funptr *)
+  (*     Ctypes.( *)
+  (*       ptr js_context *)
+  (*       @-> js_value_const *)
+  (*       @-> int *)
+  (*       @-> ptr js_value_const *)
+  (*       @-> returning js_value) *)
+
+  (* let js_new_c_function = *)
+  (*   (* JSValue JS_NewCFunction(JSContext *ctx, JSCFunction *func, const char *name, int length) *) *)
+  (*   foreign *)
+  (*     "JS_NewCFunction" *)
+  (*     (ptr js_context *)
+  (*     @-> ptr js_c_function *)
+  (*     @-> string *)
+  (*     @-> int *)
+  (*     @-> returning js_value *)
+  (*     ) *)
+
+  type js_c_function_list_entry
+
+  let js_c_function_list_entry : js_c_function_list_entry structure typ =
+    structure "JSCFunctionListEntry"
+
+  let js_set_property_function_list =
+    (* void JS_SetPropertyFunctionList(JSContext *ctx, JSValueConst obj, const JSCFunctionListEntry *tab, int len); *)
+    foreign
+      "JS_SetPropertyFunctionList"
+      (ptr js_context
+      @-> js_value_const
+      @-> ptr js_c_function_list_entry
+      @-> int
+      @-> returning void
+      )
+
+  (* --- *)
+
+  let js_interrupt_handler =
+    (* typedef int JSInterruptHandler(JSRuntime *rt, void *opaque); *)
+    Foreign.funptr Ctypes.(ptr js_runtime @-> ptr void @-> returning int)
+
+  let js_set_interrupt_handler =
+    (* void JS_SetInterruptHandler(JSRuntime *rt, JSInterruptHandler *cb, void *opaque); *)
+    foreign
+      "JS_SetInterruptHandler"
+      (ptr js_runtime @-> js_interrupt_handler @-> ptr void @-> returning void)
 end

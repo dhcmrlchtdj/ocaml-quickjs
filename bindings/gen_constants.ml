@@ -39,7 +39,16 @@ let () =
           ~includes:[ "quickjs.h" ]
           [
             ("JS_NAN_BOXING", C_define.Type.Switch);
-            ("CONFIG_BIGNUM", C_define.Type.Switch);
+            (* ("CONFIG_BIGNUM", C_define.Type.Switch); *)
+            ("JS_EVAL_TYPE_GLOBAL", C_define.Type.Int);
+            ("JS_EVAL_TYPE_MODULE", C_define.Type.Int);
+            ("JS_EVAL_TYPE_DIRECT", C_define.Type.Int);
+            ("JS_EVAL_TYPE_INDIRECT", C_define.Type.Int);
+            ("JS_EVAL_TYPE_MASK", C_define.Type.Int);
+            ("JS_EVAL_FLAG_STRICT", C_define.Type.Int);
+            ("JS_EVAL_FLAG_STRIP", C_define.Type.Int);
+            ("JS_EVAL_FLAG_COMPILE_ONLY", C_define.Type.Int);
+            ("JS_EVAL_FLAG_BACKTRACE_BARRIER", C_define.Type.Int);
           ]
       in
       write_constants result)
