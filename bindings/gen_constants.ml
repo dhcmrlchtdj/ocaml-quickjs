@@ -29,8 +29,17 @@ let () =
       let result =
         C_define.import
           t
-          ~c_flags:[ include_quickjs ]
+          ~c_flags:
+            [
+              "-D_GNU_SOURCE";
+              "-DCONFIG_VERSION=\"2020-01-19\"";
+              "-DCONFIG_BIGNUM";
+              include_quickjs;
+            ]
           ~includes:[ "quickjs.h" ]
-          [ ("JS_NAN_BOXING", C_define.Type.Switch) ]
+          [
+            ("JS_NAN_BOXING", C_define.Type.Switch);
+            ("CONFIG_BIGNUM", C_define.Type.Switch);
+          ]
       in
       write_constants result)
