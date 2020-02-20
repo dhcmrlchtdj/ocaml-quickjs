@@ -1,18 +1,24 @@
 type runtime
-(** JSRuntime represents a Javascript runtime corresponding to an object heap.
-    Several runtimes can exist at the same time but they cannot exchange objects.
-    Inside a given runtime, no multi-threading is supported.
+(** [runtime] represents a Javascript runtime corresponding to an object heap.
+    Several runtimes can exist at the same time but they cannot exchange
+    objects. Inside a given runtime, no multi-threading is supported.
     *)
 
 type context
-(** JSContext represents a Javascript context (or Realm). Each JSContext has
-    its own global objects and system objects. There can be several JSContexts
-    per JSRuntime and they can share objects, similar to frames of the same
+(** [context] represents a Javascript context (or Realm). Each context has
+    its own global objects and system objects. There can be several contexts
+    per runtime and they can share objects, similar to frames of the same
     origin sharing Javascript objects in a web browser.
     *)
 
 type value
-(** JSValue represents a Javascript value which can be a primitive type or an object *)
+(** [value] represents a Javascript value which can be a primitive type or an
+    object.
+    *)
+
+type js_exn = value
+
+type 'a or_js_exn = ('a, js_exn) result
 
 module Value : sig
   val is_null : value -> bool
@@ -35,6 +41,8 @@ module Value : sig
 
   val is_constructor : value -> bool
 
+  val is_error : value -> bool
+
   val is_exception : value -> bool
 
   val is_big_int : value -> bool
@@ -45,30 +53,30 @@ module Value : sig
 
   val is_instance_of : value -> value -> bool
 
-  val to_string : value -> (string, string) result
+  val to_string : value -> string
 
-  val to_bool : value -> (bool, string) result
+  val to_bool : value -> bool or_js_exn
 
-  val to_int32 : value -> (int32, string) result
+  val to_int32 : value -> int32 or_js_exn
 
-  val to_uint32 : value -> (Unsigned.UInt32.t, string) result
+  val to_uint32 : value -> Unsigned.UInt32.t or_js_exn
 
-  val to_int64 : value -> (int64, string) result
+  val to_int64 : value -> int64 or_js_exn
 
-  val to_float : value -> (float, string) result
-
+  val to_float : value -> float or_js_exn
 end
 
 val new_runtime : unit -> runtime
 
 val new_context : runtime -> context
 
-val eval : context -> string -> (value, string) result
-(** [eval context script] *)
-
-val eval_once : string -> (value, string) result
+val eval_once : string -> value or_js_exn
 (** [eval_once script] *)
 
-val get_exception : context -> string option
+val eval : context -> string -> value or_js_exn
+(** [eval context script] *)
 
-val get_exception_exn : context -> string
+val eval_unsafe : context -> string -> value
+(** [eval_unsafe context script], you must check exception by yourself *)
+
+val get_exception : context -> value

@@ -12,6 +12,10 @@ type value = {
   v: C.js_value Ctypes.structure;
 }
 
+type js_exn = value
+
+type 'a or_js_exn = ('a, js_exn) result
+
 (* --- *)
 
 let new_runtime () : runtime =
@@ -25,13 +29,14 @@ let new_context (rt : runtime) : context =
   let () = Gc.finalise (fun (obj : context) -> C.js_free_context obj.ctx) r in
   r
 
-let get_exception (ctx : context) : string option =
-  let ctx = ctx.ctx in
-  let err = C.js_get_exception ctx in
-  let is_exn = C.js_is_exception err = 1 in
-  if is_exn then Some (C.js_to_c_string ctx err) else None
+let new_value (ctx : context) (v : C.js_value Ctypes.structure) : value =
+  let o = { ctx; v } in
+  Gc.finalise (fun (obj : value) -> C.js_free_value obj.ctx.ctx obj.v) o;
+  o
 
-let get_exception_exn (ctx : context) : string = get_exception ctx |> Option.get
+let get_exception (ctx : context) : value =
+  let v = C.js_get_exception ctx.ctx in
+  new_value ctx v
 
 module Value = struct
   let is_null v = C.js_is_null v.v = 1
@@ -54,6 +59,8 @@ module Value = struct
 
   let is_constructor v = C.js_is_constructor v.ctx.ctx v.v = 1
 
+  let is_error v = C.js_is_error v.ctx.ctx v.v = 1
+
   let is_exception v = C.js_is_exception v.v = 1
 
   let is_big_int v = C.js_is_big_int v.ctx.ctx v.v = 1
@@ -67,46 +74,51 @@ module Value = struct
     then C.js_is_instance_of v1.ctx.ctx v1.v v2.v = 1
     else false
 
-  let to_string v : (string, string) result =
+  let to_string v : string =
     let r = C.js_to_c_string v.ctx.ctx v.v in
-    Ok r
+    r
 
-  let to_bool v : (bool, string) result =
+  let to_bool v : bool or_js_exn =
     let r = C.js_to_bool v.ctx.ctx v.v in
     match r with
+      | -1 -> Error (get_exception v.ctx)
       | 0 -> Ok false
-      | 1 -> Ok true
-      | _ -> Error (get_exception_exn v.ctx)
+      | _ -> Ok true
 
-  let to_int32 v : (int32, string) result =
+  let to_xxx v p f =
+    let r = f v.ctx.ctx p v.v in
+    if r = 0 then Ok Ctypes.(!@p) else Error (get_exception v.ctx)
+
+  let to_int32 v =
     let p = Ctypes.(allocate int32_t 0l) in
-    let r = C.js_to_int32 v.ctx.ctx p v.v in
-    if r >= 0 then Ok Ctypes.(!@p) else Error (get_exception_exn v.ctx)
+    let f = C.js_to_int32 in
+    to_xxx v p f
 
-  let to_uint32 v : (Unsigned.UInt32.t, string) result =
-    let p = Ctypes.(allocate uint32_t Unsigned.UInt32.zero) in
-    let r = C.js_to_uint32 v.ctx.ctx p v.v in
-    if r >= 0 then Ok Ctypes.(!@p) else Error (get_exception_exn v.ctx)
-
-  let to_int64 v : (int64, string) result =
+  let to_int64 v =
     let p = Ctypes.(allocate int64_t 0L) in
-    let fn = if is_big_int v then C.js_to_bigint64 else C.js_to_int64 in
-    let r = fn v.ctx.ctx p v.v in
-    if r >= 0 then Ok Ctypes.(!@p) else Error (get_exception_exn v.ctx)
+    let f = if is_big_int v then C.js_to_bigint64 else C.js_to_int64 in
+    to_xxx v p f
 
-  let to_float v : (float, string) result =
+  let to_float v =
     let p = Ctypes.(allocate double 0.0) in
-    let r = C.js_to_float64 v.ctx.ctx p v.v in
-    if r >= 0 then Ok Ctypes.(!@p) else Error (get_exception_exn v.ctx)
+    let f = C.js_to_float64 in
+    to_xxx v p f
+
+  let to_uint32 v : Unsigned.UInt32.t or_js_exn =
+    let p = Ctypes.(allocate uint32_t Unsigned.UInt32.zero) in
+    let f = C.js_to_uint32 in
+    to_xxx v p f
 end
 
-let eval (ctx : context) (script : string) : (value, string) result =
+let eval_unsafe (ctx : context) (script : string) : value =
   let len = Unsigned.Size_t.of_int (String.length script) in
   let v = C.js_eval ctx.ctx script len "input.js" 0 in
-  let r = { ctx; v } in
-  let () = Gc.finalise (fun obj -> C.js_free_value obj.ctx.ctx obj.v) r in
-  if Value.is_exception r then Error (get_exception_exn ctx) else Ok r
+  new_value ctx v
 
-let eval_once (script : string) : (value, string) result =
+let eval (ctx : context) (script : string) : value or_js_exn =
+  let r = eval_unsafe ctx script in
+  if Value.is_exception r then Error (get_exception ctx) else Ok r
+
+let eval_once (script : string) : value or_js_exn =
   let ctx = new_runtime () |> new_context in
   eval ctx script

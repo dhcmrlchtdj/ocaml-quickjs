@@ -10,7 +10,7 @@ clean:
 	dune clean
 
 fmt:
-	ocamlformat -i */*.ml
+	ocamlformat -i */*.ml{,i}
 
 doc:
 	dune build @doc
