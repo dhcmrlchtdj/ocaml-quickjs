@@ -4,23 +4,41 @@ on:
     push:
         branches:
             - master
-        paths-ignore:
-            - 'test/**'
 
 jobs:
-    build:
-        runs-on: ubuntu-18.04
+    test:
+        strategy:
+            matrix:
+                # operating-system: [macos-latest, ubuntu-latest, windows-latest]
+                operating-system: [macos-latest, ubuntu-latest]
+                ocaml-version: [ '4.09.0' ]
+        runs-on: ${{ matrix.operating-system }}
         steps:
             - uses: actions/checkout@v2.0.0
             - uses: avsm/setup-ocaml@v1.0
               with:
-                  ocaml-version: '4.09.0'
-            # - uses: actions/cache@v1.1.2
-            #   with:
-            #       path: ~/.opam/4.09.0/.opam-switch/sources
-            #       key: opam-${{ runner.os }}-${{ hashFiles('dune-project') }}
-            #       restore-keys: |
-            #           opam-${{ runner.os }}-
+                  ocaml-version: ${{ matrix.ocaml-version }}
+            - uses: actions/cache@v1.1.2
+              with:
+                  path: ~/.opam/download-cache/
+                  key: ocaml-opam-${{ runner.os }}-${{ hashFiles('dune-project') }}
+                  restore-keys: |
+                      ocaml-opam-${{ runner.os }}-
+            - run: opam install . --deps-only
+            - run: opam exec -- dune runtest
+    doc:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2.0.0
+            - uses: avsm/setup-ocaml@v1.0
+              with:
+                  ocaml-version: '4.09.1'
+            - uses: actions/cache@v1.1.2
+              with:
+                  path: ~/.opam/download-cache/
+                  key: ocaml-opam-${{ runner.os }}-${{ hashFiles('dune-project') }}
+                  restore-keys: |
+                      ocaml-opam-${{ runner.os }}-
             - run: opam install . --deps-only
             - run: opam exec -- dune build @doc
             - uses: peaceiris/actions-gh-pages@v3.0.3
