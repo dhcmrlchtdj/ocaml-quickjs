@@ -24,6 +24,7 @@ jobs:
                   key: ocaml-opam-${{ runner.os }}-${{ hashFiles('dune-project') }}
                   restore-keys: |
                       ocaml-opam-${{ runner.os }}-
+            - run: opam depext -yt conf-pkg-config
             - run: opam install . --deps-only
             - run: opam exec -- dune runtest
     doc:
