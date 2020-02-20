@@ -16,13 +16,14 @@ type value = {
 
 let new_runtime () : runtime =
   let rt = C.js_new_runtime () in
-  let () = Gc.finalise (fun rt -> C.js_free_runtime rt) rt in
+  let () = Gc.finalise (fun obj -> C.js_free_runtime obj) rt in
   rt
 
 let new_context (rt : runtime) : context =
   let ctx = C.js_new_context rt in
-  let () = Gc.finalise (fun c -> C.js_free_context c) ctx in
-  { rt; ctx }
+  let r = { rt; ctx } in
+  let () = Gc.finalise (fun (obj : context) -> C.js_free_context obj.ctx) r in
+  r
 
 let get_exception (ctx : context) : string option =
   let ctx = ctx.ctx in
@@ -102,8 +103,8 @@ end
 let eval (ctx : context) (script : string) : (value, string) result =
   let len = Unsigned.Size_t.of_int (String.length script) in
   let v = C.js_eval ctx.ctx script len "input.js" 0 in
-  let () = Gc.finalise (fun v -> C.js_free_value ctx.ctx v) v in
   let r = { ctx; v } in
+  let () = Gc.finalise (fun obj -> C.js_free_value obj.ctx.ctx obj.v) r in
   if Value.is_exception r then Error (get_exception_exn ctx) else Ok r
 
 let eval_once (script : string) : (value, string) result =

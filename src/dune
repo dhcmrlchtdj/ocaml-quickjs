@@ -1,14 +1,14 @@
 (library
  (public_name quickjs)
  (name quickjs)
- (libraries quickjs_raw)
- (modules quickjs))
+ (modules quickjs)
+ (libraries quickjs_raw))
 
 (library
  (public_name quickjs.raw)
  (name quickjs_raw)
- (libraries bindings)
  (modules quickjs_raw stubs)
+ (libraries bindings)
  (foreign_archives ../vendor/quickjs)
  (foreign_stubs
   (language c)

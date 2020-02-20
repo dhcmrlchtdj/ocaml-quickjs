@@ -1,4 +1,17 @@
 (library
  (public_name quickjs.bindings)
  (name bindings)
+ (modules constants bindings)
  (libraries ctypes ctypes.stubs ctypes.foreign))
+
+(rule
+ (targets constants.ml)
+ (deps
+  (source_tree ../vendor/quickjs))
+ (action
+  (run ./gen_constants.exe)))
+
+(executable
+ (name gen_constants)
+ (modules gen_constants)
+ (libraries dune.configurator))

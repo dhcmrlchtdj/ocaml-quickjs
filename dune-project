@@ -17,6 +17,7 @@
   (ctypes               (and (>= 0.16.0)))
   (ctypes-foreign       (and (>= 0.4.0)))
   (dune                 (and :build (>= 2.3.0)))
+  (dune-configurator    (and :build (>= 2.3.0)))
   (ocamlformat          (and :dev (>= 0.13.0)))
   ))
 
