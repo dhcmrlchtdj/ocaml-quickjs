@@ -47,6 +47,12 @@ let new_context (rt : runtime) : context =
   let () = Gc.finalise (fun (obj : context) -> C.js_free_context obj.ctx) r in
   r
 
+let set_memory_limit = C.js_set_memory_limit
+
+let set_gc_threshold = C.js_set_gc_threshold
+
+let set_max_stack_size (ctx : context) = C.js_set_max_stack_size ctx.ctx
+
 let get_exception (ctx : context) : value =
   let v = C.js_get_exception ctx.ctx in
   build_value ctx v

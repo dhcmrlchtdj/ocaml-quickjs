@@ -34,7 +34,13 @@ type 'a or_js_exn = ('a, js_exn) result
 
 val new_runtime : unit -> runtime
 
+val set_memory_limit : runtime -> Unsigned.size_t -> unit
+
+val set_gc_threshold : runtime -> Unsigned.size_t -> unit
+
 val new_context : runtime -> context
+
+val set_max_stack_size : context -> Unsigned.size_t -> unit
 
 val check_exception : value -> value or_js_exn
 (** [check_exception value] get exception obj from context.
@@ -93,7 +99,7 @@ module Value : sig
 
   val to_int32 : value -> int32 or_js_exn
 
-  val to_uint32 : value -> Unsigned.UInt32.t or_js_exn
+  val to_uint32 : value -> Unsigned.uint32 or_js_exn
 
   val to_int64 : value -> int64 or_js_exn
 
