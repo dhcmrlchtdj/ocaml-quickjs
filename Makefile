@@ -6,6 +6,9 @@ build:
 test:
 	dune runtest
 
+test_update:
+	dune runtest --auto-promote
+
 clean:
 	dune clean
 
@@ -24,4 +27,4 @@ install: release
 uninstall: release
 	opam remove .
 
-.PHONY: build test clean fmt doc release install uninstall
+.PHONY: build test clean fmt doc release install uninstall test_update

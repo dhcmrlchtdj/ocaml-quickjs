@@ -1,0 +1,20 @@
+
+###### test eval
+6765
+
+###### test throw
+exception catched
+some string
+
+###### test Value.is_xxx
+is_error
+Error: some error
+
+###### test Value.to_xxx
+true
+10
+9007199254740991
+0.300000
+
+###### test bytecode
+6765
