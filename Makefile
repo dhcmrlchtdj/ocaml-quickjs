@@ -7,13 +7,13 @@ test:
 	dune runtest
 
 test_update:
-	dune runtest --auto-promote
+	-dune runtest --auto-promote
 
 clean:
 	dune clean
 
 fmt:
-	dune build @fmt --auto-promote
+	-dune build @fmt --auto-promote
 
 doc:
 	dune build @doc
