@@ -27,13 +27,13 @@ type 'a or_js_exn = ('a, js_exn) result
 
 let build_value (ctx : context) (v : C.js_value Ctypes.structure) : value =
   let o = { ctx; v } in
-  Gc.finalise (fun (obj : value) -> C.js_free_value obj.ctx.ctx obj.v) o;
+  Gc.finalise (fun { ctx; v } -> C.js_free_value ctx.ctx v) o;
   o
 
 let build_bytecode (ctx : context) (bc : C.js_value Ctypes.structure) : bytecode
   =
   let o = { ctx; bc } in
-  Gc.finalise (fun (obj : bytecode) -> C.js_free_value obj.ctx.ctx obj.bc) o;
+  Gc.finalise (fun { ctx; bc } -> C.js_free_value ctx.ctx bc) o;
   o
 
 let new_runtime () : runtime =
