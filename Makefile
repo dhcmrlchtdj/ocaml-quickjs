@@ -13,7 +13,7 @@ clean:
 	dune clean
 
 fmt:
-	ocamlformat -i */*.ml{,i}
+	dune build @fmt --auto-promote
 
 doc:
 	dune build @doc
