@@ -13,7 +13,7 @@ let _ =
         return fib(n-2) + fib(n-1)
       }
     }
-  |}
+    |}
   in
   let ctx = Quickjs.new_runtime () |> Quickjs.new_context in
   let _ = Quickjs.eval_unsafe ~ctx fib in
@@ -54,29 +54,21 @@ let _ =
   Printf.printf "%f\n" x;
   Ok ()
 
-(* let _ = *)
-(*   print_endline "\n###### test bytecode"; *)
-(*   let fib = *)
-(*     {| *)
-(*     function code () { *)
-(*       const fib = (n) => { *)
-(*         if (n <= 1) { *)
-(*           return n *)
-(*         } else { *)
-(*           return fib(n-2) + fib(n-1) *)
-(*         } *)
-(*       } *)
-(*       return fib(20) *)
-(*     } *)
-(*   |} *)
-(*   in *)
-(*   let bc = Quickjs.compile fib in *)
-(*   print_endline "==="; *)
-(*   let r = Quickjs.eval_bytecode bc in *)
-(*   match r with *)
-(*     | Ok r -> *)
-(*       let+ r = Quickjs.Value.to_int32 r in *)
-(*       print_endline (Int32.to_string r) *)
-(*     | Error r -> *)
-(*       let _ = Quickjs.Value.to_string r |> print_endline in *)
-(*       Ok () *)
+let _ =
+  print_endline "\n###### test bytecode";
+  let fib20 =
+    {|
+    const fib = (n) => {
+      if (n <= 1) {
+        return n
+      } else {
+        return fib(n-2) + fib(n-1)
+      }
+    }
+    fib(20)
+    |}
+  in
+  let* bc = Quickjs.compile fib20 in
+  let* r = Quickjs.execute bc in
+  let+ r = Quickjs.Value.to_int32 r in
+  print_endline (Int32.to_string r)

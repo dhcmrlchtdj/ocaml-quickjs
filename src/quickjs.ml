@@ -169,9 +169,9 @@ let raw_eval
   =
   let build_flag typ flags compile_only =
     let f = variants2flag typ in
-    let f = if compile_only then f land variants2flag `COMPILE_ONLY else f in
+    let f = if compile_only then f lor variants2flag `COMPILE_ONLY else f in
     let f =
-      List.fold_left (fun acc curr -> acc land variants2flag curr) f flags
+      List.fold_left (fun acc curr -> acc lor variants2flag curr) f flags
     in
     f
   in
@@ -217,7 +217,7 @@ let compile
   let v = check_exception v in
   Result.map (fun v -> build_bytecode v.ctx v.v) v
 
-let exec_bytecode (bc : bytecode) : value or_js_exn =
+let execute (bc : bytecode) : value or_js_exn =
   let ctx = bc.ctx in
   let r = C.js_eval_function ctx.ctx bc.bc in
   let r = build_value ctx r in
