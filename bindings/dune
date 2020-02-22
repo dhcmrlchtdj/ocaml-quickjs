@@ -9,9 +9,4 @@
  (deps
   (source_tree ../vendor/quickjs))
  (action
-  (run ./gen_constants.exe)))
-
-(executable
- (name gen_constants)
- (modules gen_constants)
- (libraries dune.configurator))
+  (run ../gen/constants.exe)))

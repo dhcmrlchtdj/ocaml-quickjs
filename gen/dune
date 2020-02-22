@@ -1,0 +1,9 @@
+(executable
+ (name stubs)
+ (modules stubs)
+ (libraries ctypes.stubs bindings))
+
+(executable
+ (name constants)
+ (modules constants)
+ (libraries dune.configurator))

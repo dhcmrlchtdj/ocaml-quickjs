@@ -18,4 +18,4 @@
 (rule
  (targets stubs.ml stubs.c)
  (action
-  (run ../stubs/gen.exe)))
+  (run ../gen/stubs.exe)))

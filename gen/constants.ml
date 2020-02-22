@@ -1,8 +1,3 @@
-(*
-https://dune.build/blog/configurator-constants/
-https://github.com/ocaml/dune/blob/2.3.0/otherlibs/configurator/test/blackbox-tests/test-cases/configurator/import-define/run.ml
-*)
-
 module Configurator = Configurator.V1
 module C_define = Configurator.C_define
 
