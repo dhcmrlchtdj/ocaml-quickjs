@@ -2,7 +2,9 @@
  (public_name quickjs)
  (name quickjs)
  (modules quickjs)
- (libraries quickjs_raw ctypes))
+ (libraries quickjs_raw ctypes)
+ (preprocess
+  (pps bisect_ppx -conditional)))
 
 (library
  (public_name quickjs.raw)

@@ -1,25 +1,37 @@
 SHELL := bash
 
 build:
-	dune build @install --profile=dev
+	opam exec dune -- build @install --profile=dev
 
 test:
-	dune runtest
+	opam exec dune -- runtest
 
 test_update:
-	-dune runtest --auto-promote
+	-opam exec dune -- runtest --auto-promote
+
+coverage:
+	opam exec dune -- clean
+	BISECT_ENABLE=yes opam exec dune -- runtest
+	opam exec bisect-ppx-report -- -html=_coverage \
+		-coveralls=_coverage/coverage.json \
+		-I=_build/default/ \
+		_build/default/test/bisect*.out
 
 clean:
-	dune clean
+	opam exec dune -- clean
 
 fmt:
-	-dune build @fmt --auto-promote
+	-opam exec dune -- build @fmt --auto-promote
 
 doc:
-	dune build @doc
+	opam exec dune -- build @doc
 
 release:
-	dune build @install --profile=release
+	opam exec dune -- build @install --profile=release
+
+dep:
+	opam depext -y conf-pkg-config
+	opam install . --deps-only
 
 install: release
 	opam install .
@@ -27,4 +39,4 @@ install: release
 uninstall: release
 	opam remove .
 
-.PHONY: build test clean fmt doc release install uninstall test_update
+.PHONY: build test clean fmt doc release install uninstall test_update coverage dep
