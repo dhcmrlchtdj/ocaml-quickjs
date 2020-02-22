@@ -374,26 +374,28 @@ module Make (F : Cstubs.FOREIGN) = struct
 
   (* --- *)
 
-  (* let js_c_function = *)
-  (*   (* typedef JSValue JSCFunction(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv); *) *)
-  (*   Foreign.funptr *)
-  (*     Ctypes.( *)
-  (*       ptr js_context *)
-  (*       @-> js_value_const *)
-  (*       @-> int *)
-  (*       @-> ptr js_value_const *)
-  (*       @-> returning js_value) *)
+  (*
+  let js_c_function =
+    (* typedef JSValue JSCFunction(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv); *)
+    Foreign.funptr
+      Ctypes.(
+        ptr js_context
+        @-> js_value_const
+        @-> int
+        @-> ptr js_value_const
+        @-> returning js_value)
 
-  (* let js_new_c_function = *)
-  (*   (* JSValue JS_NewCFunction(JSContext *ctx, JSCFunction *func, const char *name, int length) *) *)
-  (*   foreign *)
-  (*     "JS_NewCFunction" *)
-  (*     (ptr js_context *)
-  (*     @-> ptr js_c_function *)
-  (*     @-> string *)
-  (*     @-> int *)
-  (*     @-> returning js_value *)
-  (*     ) *)
+  let js_new_c_function =
+    (* JSValue JS_NewCFunction(JSContext *ctx, JSCFunction *func, const char *name, int length) *)
+    foreign
+      "JS_NewCFunction"
+      (ptr js_context
+      @-> js_c_function
+      @-> string
+      @-> int
+      @-> returning js_value
+      )
+  *)
 
   type js_c_function_list_entry
 
