@@ -2,21 +2,21 @@ module C = Quickjs_raw
 
 (* --- *)
 
-type runtime = C.js_runtime Ctypes.structure Ctypes.ptr
+type runtime = C.js_runtime_ptr
 
 type context = {
   rt: runtime;
-  ctx: C.js_context Ctypes.structure Ctypes.ptr;
+  ctx: C.js_context_ptr;
 }
 
 type bytecode = {
   ctx: context;
-  bc: C.js_value Ctypes.structure;
+  bc: C.js_value;
 }
 
 type value = {
   ctx: context;
-  v: C.js_value Ctypes.structure;
+  v: C.js_value;
 }
 
 type js_exn = value
@@ -25,13 +25,12 @@ type 'a or_js_exn = ('a, js_exn) result
 
 (* --- *)
 
-let build_value (ctx : context) (v : C.js_value Ctypes.structure) : value =
+let build_value (ctx : context) (v : C.js_value) : value =
   let o = { ctx; v } in
   Gc.finalise (fun { ctx; v } -> C.js_free_value ctx.ctx v) o;
   o
 
-let build_bytecode (ctx : context) (bc : C.js_value Ctypes.structure) : bytecode
-  =
+let build_bytecode (ctx : context) (bc : C.js_value) : bytecode =
   let o = { ctx; bc } in
   Gc.finalise (fun { ctx; bc } -> C.js_free_value ctx.ctx bc) o;
   o

@@ -1,32 +1,18 @@
 open Ctypes
 
-module Make (F : Cstubs.FOREIGN) = struct
-  open F
+module type S_BOXING_OR_NOT = sig
+  type js_value
 
-  (* --- *)
+  val js_value : js_value typ
+end
 
-  include Constants
+module JS_NAN_BOXING : S_BOXING_OR_NOT = struct
+  type js_value = Unsigned.uint64
 
-  (* --- *)
+  let js_value = uint64_t
+end
 
-  type js_runtime
-
-  let js_runtime : js_runtime structure typ = structure "JSRuntime"
-
-  type js_context
-
-  let js_context : js_context structure typ = structure "JSContext"
-
-  (* --- *)
-
-  let js_class_id = uint32_t
-
-  let js_bool = int
-
-  (* --- *)
-
-  (* #else /* !JS_NAN_BOXING */ *)
-
+module NOT_JS_NAN_BOXING : S_BOXING_OR_NOT = struct
   type js_value_union
 
   let js_value_union : js_value_union union typ = union "JSValueUnion"
@@ -39,15 +25,72 @@ module Make (F : Cstubs.FOREIGN) = struct
 
   let () = seal js_value_union
 
-  type js_value
+  type _js_value
 
-  let js_value : js_value structure typ = structure "JSValue"
+  type js_value = _js_value structure
+
+  let js_value : js_value typ = structure "JSValue"
 
   let _ = field js_value "u" js_value_union
 
   let _ = field js_value "tag" int64_t
 
   let () = seal js_value
+end
+
+let box_or_not : (module S_BOXING_OR_NOT) =
+  if Constants.define_JS_NAN_BOXING
+  then
+    ( module struct
+      include JS_NAN_BOXING
+    end
+    )
+  else
+    ( module struct
+      include NOT_JS_NAN_BOXING
+    end
+    )
+
+module BOXING_OR_NOT = (val box_or_not : S_BOXING_OR_NOT)
+
+module Make (F : Cstubs.FOREIGN) = struct
+  open F
+
+  (* --- *)
+
+  include Constants
+
+  (* --- *)
+
+  type _js_runtime
+
+  type js_runtime = _js_runtime structure
+
+  type js_runtime_ptr = js_runtime ptr
+
+  let js_runtime : js_runtime typ = structure "JSRuntime"
+
+  (* --- *)
+
+  type _js_context
+
+  type js_context = _js_context structure
+
+  type js_context_ptr = js_context ptr
+
+  let js_context : js_context typ = structure "JSContext"
+
+  (* --- *)
+
+  let js_class_id = uint32_t
+
+  let js_bool = int
+
+  (* --- *)
+
+  type js_value = BOXING_OR_NOT.js_value
+
+  let js_value = BOXING_OR_NOT.js_value
 
   let js_value_const = js_value
 

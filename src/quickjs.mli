@@ -151,15 +151,15 @@ val execute : bytecode -> value or_js_exn
 
 (** convert [Quickjs.xxx] to [Quickjs_raw.xxx] *)
 module Raw : sig
-  val of_runtime : runtime -> Quickjs_raw.js_runtime Ctypes.structure Ctypes.ptr
+  val of_runtime : runtime -> Quickjs_raw.js_runtime_ptr
   (** [of_runtime runtime] get raw represent of [runtime] *)
 
-  val of_context : context -> Quickjs_raw.js_context Ctypes.structure Ctypes.ptr
+  val of_context : context -> Quickjs_raw.js_context_ptr
   (** [of_context context] get raw represent of [context] *)
 
-  val of_value : value -> Quickjs_raw.js_value Ctypes.structure
+  val of_value : value -> Quickjs_raw.js_value
   (** [of_value value] get raw represent of [value] *)
 
-  val of_bytecode : bytecode -> Quickjs_raw.js_value Ctypes.structure
+  val of_bytecode : bytecode -> Quickjs_raw.js_value
   (** [of_bytecode bytecode] get raw represent of [bytecode] *)
 end
