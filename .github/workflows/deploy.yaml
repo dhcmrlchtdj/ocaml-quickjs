@@ -26,6 +26,11 @@ jobs:
                       ${{ runner.os }}-ocaml-opam-
             - run: make dep
             - run: make coverage
+            - uses: codecov/codecov-action@v1.0.5
+              with:
+                  token: ${{ secrets.CODECOV_TOKEN }}
+                  file: ./_coverage/coverage.json
+
     doc:
         runs-on: ubuntu-latest
         steps:
