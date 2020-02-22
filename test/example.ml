@@ -34,6 +34,21 @@ let _ =
 let _ =
   print_endline "\n###### test Value.is_xxx";
   let open Quickjs.Value in
+  let _ =
+    let ctx = Quickjs.new_runtime () |> Quickjs.new_context in
+    let d1 = Quickjs.eval_unsafe ~ctx "new Date()" in
+    let d2 = Quickjs.eval_unsafe ~ctx "Date" in
+    if is_instance_of d1 d2
+    then print_endline "instanceof | pass"
+    else print_endline "instanceof | fail"
+  in
+  let _ =
+    let x = Quickjs.eval_unsafe "1" in
+    let y = convert_to_string x in
+    if is_number x && is_string y
+    then print_endline "convert_to_string | pass"
+    else print_endline "convert_to_string | fail"
+  in
   let cases =
     [
       (is_null, "null");
@@ -57,7 +72,6 @@ let _ =
     let r = if f v then s ^ " | pass" else s ^ " | fail" in
     print_endline r
   in
-
   List.iter iter_f cases
 
 let _ =
@@ -71,9 +85,12 @@ let _ =
   let* x = Quickjs.eval "Number.MAX_SAFE_INTEGER" in
   let* x = Quickjs.Value.to_int64 x in
   Printf.printf "%Ld\n" x;
+  let* x = Quickjs.eval "1n" in
+  let* x = Quickjs.Value.to_int64 x in
+  Printf.printf "%Ld\n" x;
   let* x = Quickjs.eval "0.1+0.2" in
   let* x = Quickjs.Value.to_float x in
-  Printf.printf "%f\n" x;
+  Printf.printf "%.17f\n" x;
   Ok ()
 
 let _ =

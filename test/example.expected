@@ -7,6 +7,8 @@ exception catched
 some string
 
 ###### test Value.is_xxx
+instanceof | pass
+convert_to_string | pass
 null | pass
 undefined | pass
 true | pass
@@ -24,7 +26,8 @@ new Error() | pass
 true
 10
 9007199254740991
-0.300000
+1
+0.30000000000000004
 
 ###### test bytecode
 6765
