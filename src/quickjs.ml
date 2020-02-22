@@ -4,7 +4,10 @@ module C = Quickjs_raw
 
 type runtime = C.js_runtime_ptr
 
-type context = C.js_context_ptr
+type context = {
+  rt: runtime;
+  ctx: C.js_context_ptr;
+}
 
 type bytecode = {
   ctx: context;
@@ -22,19 +25,25 @@ type 'a or_js_exn = ('a, js_exn) result
 
 (* --- *)
 
+let get_raw_runtime (rt : runtime) = rt
+
+let get_raw_context (ctx : context) = ctx.ctx
+
+let get_raw_value o = o.jsval
+
+let get_raw_bytecode bc = bc.bc
+
+(* --- *)
+
 let build_value (ctx : context) (jsval : C.js_value) : value =
   let o = { ctx; jsval } in
-  Gc.finalise (fun { ctx; jsval } -> C.js_free_value ctx jsval) o;
+  Gc.finalise (fun { ctx; jsval } -> C.js_free_value ctx.ctx jsval) o;
   o
-
-let get_raw_value o : C.js_value = o.jsval
 
 let build_bytecode (ctx : context) (bc : C.js_value) : bytecode =
   let o = { ctx; bc } in
-  Gc.finalise (fun { ctx; bc } -> C.js_free_value ctx bc) o;
+  Gc.finalise (fun { ctx; bc } -> C.js_free_value ctx.ctx bc) o;
   o
-
-let get_raw_bytecode bc : C.js_value = bc.bc
 
 (* --- *)
 
@@ -57,18 +66,18 @@ let set_interrupt_handler rt (handler : interrupt_handler) =
 (* --- *)
 
 let new_context rt : context =
-  let ctx = C.js_new_context rt in
-  let () = Gc.finalise (fun obj -> C.js_free_context obj) ctx in
+  let ctx = { rt; ctx = C.js_new_context rt } in
+  let () = Gc.finalise (fun (obj : context) -> C.js_free_context obj.ctx) ctx in
   ctx
 
-let set_max_stack_size = C.js_set_max_stack_size
+let set_max_stack_size (ctx : context) = C.js_set_max_stack_size ctx.ctx
 
-let get_runtime = C.js_get_runtime
+let get_runtime ctx = ctx.rt
 
 (* --- *)
 
-let get_exception ctx : value =
-  let jsval = C.js_get_exception ctx in
+let get_exception (ctx : context) : value =
+  let jsval = C.js_get_exception ctx.ctx in
   build_value ctx jsval
 
 let check_exception o : value or_js_exn =
@@ -76,7 +85,7 @@ let check_exception o : value or_js_exn =
 
 module Value = struct
   let convert_to_string o : value =
-    let new_o = C.js_to_string o.ctx o.jsval in
+    let new_o = C.js_to_string o.ctx.ctx o.jsval in
     build_value o.ctx new_o
 
   let is_uninitialized o = C.js_is_uninitialized o.jsval = 1
@@ -93,19 +102,19 @@ module Value = struct
 
   let is_symbol o = C.js_is_symbol o.jsval <> 0
 
-  let is_array o = C.js_is_array o.ctx o.jsval <> 0
+  let is_array o = C.js_is_array o.ctx.ctx o.jsval <> 0
 
   let is_object o = C.js_is_object o.jsval <> 0
 
-  let is_function o = C.js_is_function o.ctx o.jsval <> 0
+  let is_function o = C.js_is_function o.ctx.ctx o.jsval <> 0
 
-  let is_constructor o = C.js_is_constructor o.ctx o.jsval <> 0
+  let is_constructor o = C.js_is_constructor o.ctx.ctx o.jsval <> 0
 
-  let is_error o = C.js_is_error o.ctx o.jsval <> 0
+  let is_error o = C.js_is_error o.ctx.ctx o.jsval <> 0
 
   let is_exception o = C.js_is_exception o.jsval <> 0
 
-  let is_big_int o = C.js_is_big_int o.ctx o.jsval <> 0
+  let is_big_int o = C.js_is_big_int o.ctx.ctx o.jsval <> 0
 
   let is_big_float o = C.js_is_big_float o.jsval <> 0
 
@@ -113,23 +122,23 @@ module Value = struct
 
   let is_instance_of o1 o2 =
     if o1.ctx == o2.ctx
-    then C.js_is_instance_of o1.ctx o1.jsval o2.jsval <> 0
+    then C.js_is_instance_of o1.ctx.ctx o1.jsval o2.jsval <> 0
     else false
 
   let to_string o : string =
-    let s = C.js_to_c_string o.ctx o.jsval in
+    let s = C.js_to_c_string o.ctx.ctx o.jsval in
     (* FIXME: C.js_free_c_string *)
     s
 
   let to_bool o : bool or_js_exn =
-    let r = C.js_to_bool o.ctx o.jsval in
+    let r = C.js_to_bool o.ctx.ctx o.jsval in
     match r with
       | -1 -> Error (get_exception o.ctx)
       | 0 -> Ok false
       | _ -> Ok true
 
   let to_xxx o ptr set_ptr =
-    let xxx = set_ptr o.ctx ptr o.jsval in
+    let xxx = set_ptr o.ctx.ctx ptr o.jsval in
     if xxx = 0 then Ok (Ctypes.( !@ ) ptr) else Error (get_exception o.ctx)
 
   let to_int32 o =
@@ -195,7 +204,7 @@ let raw_eval
   let ctx = get_or_default (lazy (new_runtime () |> new_context)) ctx in
   let flag = build_flag typ flags compile_only in
   let len = Unsigned.Size_t.of_int (String.length script) in
-  let jsval = C.js_eval ctx script len "input.js" flag in
+  let jsval = C.js_eval ctx.ctx script len "input.js" flag in
   build_value ctx jsval
 
 let eval_unsafe
@@ -229,6 +238,6 @@ let compile
 
 let execute (bc : bytecode) : value or_js_exn =
   let ctx = bc.ctx in
-  let r = C.js_eval_function ctx bc.bc in
+  let r = C.js_eval_function ctx.ctx bc.bc in
   let r = build_value ctx r in
   check_exception r
