@@ -1,6 +1,6 @@
 let ( let* ) = Result.bind
 
-let ( let+ ) r f = Result.map f r
+let ok_unit = Ok ()
 
 let _ =
   print_endline "\n###### test eval";
@@ -18,8 +18,9 @@ let _ =
   let ctx = Quickjs.new_runtime () |> Quickjs.new_context in
   let* _ = Quickjs.eval ~ctx fib in
   let* r = Quickjs.eval ~ctx "fib(20)" in
-  let+ r = Quickjs.Value.to_int32 r in
-  print_endline (Int32.to_string r)
+  let* r = Quickjs.Value.to_int32 r in
+  print_endline (Int32.to_string r);
+  ok_unit
 
 let _ =
   print_endline "\n###### test throw";
@@ -29,7 +30,7 @@ let _ =
     | Ok _ -> assert false
     | Error e ->
       print_endline "exception catched";
-      print_endline (Quickjs.Value.to_string e)
+      print_endline (Quickjs.Value.to_string e |> Option.get)
 
 let _ =
   print_endline "\n###### test Value.is_xxx";
@@ -109,8 +110,9 @@ let _ =
   in
   let* bc = Quickjs.compile fib20 in
   let* r = Quickjs.execute bc in
-  let+ r = Quickjs.Value.to_int32 r in
-  print_endline (Int32.to_string r)
+  let* r = Quickjs.Value.to_int32 r in
+  print_endline (Int32.to_string r);
+  ok_unit
 
 let _ =
   print_endline "\n###### test interrupt_handler";
@@ -140,4 +142,4 @@ let _ =
   let r = Quickjs.eval ~ctx fib in
   match r with
     | Ok _ -> assert false
-    | Error e -> print_endline (Quickjs.Value.to_string e)
+    | Error e -> print_endline (Quickjs.Value.to_string e |> Option.get)

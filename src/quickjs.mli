@@ -101,8 +101,6 @@ module Value : sig
 
   val is_instance_of : value -> value -> bool
 
-  val to_string : value -> string
-
   val to_bool : value -> bool or_js_exn
 
   val to_int32 : value -> int32 or_js_exn
@@ -112,6 +110,9 @@ module Value : sig
   val to_int64 : value -> int64 or_js_exn
 
   val to_float : value -> float or_js_exn
+
+  val to_string : value -> string option
+  (** return None if exception *)
 end
 
 val check_exception : value -> value or_js_exn

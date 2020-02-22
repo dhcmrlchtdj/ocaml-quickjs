@@ -125,10 +125,24 @@ module Value = struct
     then C.js_is_instance_of o1.ctx.ctx o1.jsval o2.jsval <> 0
     else false
 
-  let to_string o : string =
-    let s = C.js_to_c_string o.ctx.ctx o.jsval in
-    (* FIXME: C.js_free_c_string *)
-    s
+  let to_string o : string option =
+    let rec aux (buf : Buffer.t) (char_ptr : char Ctypes.ptr) : string =
+      let ch = Ctypes.(!@char_ptr) in
+      if ch = '\000'
+      then Buffer.contents buf
+      else (
+        Buffer.add_char buf ch;
+        aux buf Ctypes.(char_ptr +@ 1)
+      )
+    in
+    let cstring = C.js_to_c_string o.ctx.ctx o.jsval in
+    if Ctypes.is_null cstring
+    then None
+    else (
+      let ostring = aux (Buffer.create 64) cstring in
+      let () = C.js_free_c_string o.ctx.ctx cstring in
+      Some ostring
+    )
 
   let to_bool o : bool or_js_exn =
     let r = C.js_to_bool o.ctx.ctx o.jsval in
