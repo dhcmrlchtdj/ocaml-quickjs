@@ -35,10 +35,25 @@ let build_bytecode (ctx : context) (bc : C.js_value) : bytecode =
   Gc.finalise (fun { ctx; bc } -> C.js_free_value ctx.ctx bc) o;
   o
 
+(* --- *)
+
 let new_runtime () : runtime =
   let rt = C.js_new_runtime () in
   let () = Gc.finalise (fun obj -> C.js_free_runtime obj) rt in
   rt
+
+let set_memory_limit = C.js_set_memory_limit
+
+let set_gc_threshold = C.js_set_gc_threshold
+
+type interrupt_handler = runtime -> bool
+
+let set_interrupt_handler (rt : runtime) (callback : interrupt_handler) =
+  let handler runtime _opaque = if callback runtime then 0 else 1 in
+  let opaque = Ctypes.(to_voidp null) in
+  C.js_set_interrupt_handler rt handler opaque
+
+(* --- *)
 
 let new_context (rt : runtime) : context =
   let ctx = C.js_new_context rt in
@@ -46,15 +61,18 @@ let new_context (rt : runtime) : context =
   let () = Gc.finalise (fun (obj : context) -> C.js_free_context obj.ctx) r in
   r
 
-let set_memory_limit = C.js_set_memory_limit
-
-let set_gc_threshold = C.js_set_gc_threshold
-
 let set_max_stack_size (ctx : context) = C.js_set_max_stack_size ctx.ctx
+
+let get_runtime_from_context (ctx : context) = ctx.rt
+
+(* --- *)
 
 let get_exception (ctx : context) : value =
   let v = C.js_get_exception ctx.ctx in
   build_value ctx v
+
+let check_exception (v : value) : value or_js_exn =
+  if C.js_is_exception v.v = 1 then Error (get_exception v.ctx) else Ok v
 
 module Value = struct
   let convert_to_string v : value =
@@ -133,9 +151,6 @@ module Value = struct
     let f = C.js_to_uint32 in
     to_xxx v p f
 end
-
-let check_exception (r : value) : value or_js_exn =
-  if Value.is_exception r then Error (get_exception r.ctx) else Ok r
 
 (* --- *)
 

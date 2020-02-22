@@ -18,3 +18,6 @@ true
 
 ###### test bytecode
 6765
+
+###### test interrupt_handler
+InternalError: interrupted

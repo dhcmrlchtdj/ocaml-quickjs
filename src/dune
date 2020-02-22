@@ -2,7 +2,7 @@
  (public_name quickjs)
  (name quickjs)
  (modules quickjs)
- (libraries quickjs_raw))
+ (libraries quickjs_raw ctypes))
 
 (library
  (public_name quickjs.raw)

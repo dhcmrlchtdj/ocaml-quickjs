@@ -72,3 +72,32 @@ let _ =
   let* r = Quickjs.execute bc in
   let+ r = Quickjs.Value.to_int32 r in
   print_endline (Int32.to_string r)
+
+let _ =
+  print_endline "\n###### test interrupt_handler";
+  let ctx = Quickjs.new_runtime () |> Quickjs.new_context in
+  let () =
+    let rt = Quickjs.get_runtime_from_context ctx in
+    let count = ref 0 in
+    let cb _runtime =
+      incr count;
+      !count = 2
+    in
+    Quickjs.set_interrupt_handler rt cb
+  in
+  let fib =
+    {|
+    const fib = (n) => {
+      if (n <= 1) {
+        return n
+      } else {
+        return fib(n-2) + fib(n-1)
+      }
+    }
+    fib(20)
+    |}
+  in
+  let r = Quickjs.eval ~ctx fib in
+  match r with
+    | Ok _ -> assert false
+    | Error e -> print_endline (Quickjs.Value.to_string e)

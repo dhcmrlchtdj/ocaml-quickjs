@@ -38,7 +38,16 @@ val set_memory_limit : runtime -> Unsigned.size_t -> unit
 
 val set_gc_threshold : runtime -> Unsigned.size_t -> unit
 
+type interrupt_handler = runtime -> bool
+(** [interrupt_handler runtime] return false will interrupt runtime *)
+
+val set_interrupt_handler : runtime -> interrupt_handler -> unit
+
+(** {1 context} *)
+
 val new_context : runtime -> context
+
+val get_runtime_from_context : context -> runtime
 
 val set_max_stack_size : context -> Unsigned.size_t -> unit
 
