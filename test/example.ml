@@ -16,8 +16,8 @@ let _ =
     |}
   in
   let ctx = Quickjs.new_runtime () |> Quickjs.new_context in
-  let _ = Quickjs.eval_unsafe ~ctx fib in
-  let r = Quickjs.eval_unsafe ~ctx "fib(20)" in
+  let* _ = Quickjs.eval ~ctx fib in
+  let* r = Quickjs.eval ~ctx "fib(20)" in
   let+ r = Quickjs.Value.to_int32 r in
   print_endline (Int32.to_string r)
 
@@ -116,7 +116,7 @@ let _ =
   print_endline "\n###### test interrupt_handler";
   let ctx = Quickjs.new_runtime () |> Quickjs.new_context in
   let () =
-    let rt = Quickjs.get_runtime_from_context ctx in
+    let rt = Quickjs.get_runtime ctx in
     let count = ref 0 in
     let cb _runtime =
       incr count;

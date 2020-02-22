@@ -246,9 +246,13 @@ module Make (F : Cstubs.FOREIGN) = struct
   int JS_ToInt32(JSContext *ctx, int32_t *pres, JSValueConst val);
   int JS_ToUint32(JSContext *ctx, uint32_t *pres, JSValueConst val)
   int JS_ToInt64(JSContext *ctx, int64_t *pres, JSValueConst val);
-  int JS_ToFloat64(JSContext *ctx, double *pres, JSValueConst val);
   int JS_ToBigInt64(JSContext *ctx, int64_t *pres, JSValueConst val);
+  int JS_ToFloat64(JSContext *ctx, double *pres, JSValueConst val);
+
   JSValue JS_ToString(JSContext *ctx, JSValueConst val);
+
+  const char *JS_ToCString(JSContext *ctx, JSValueConst val1)
+  void JS_FreeCString(JSContext *ctx, const char *ptr);
   *)
 
   let js_to_bool =
@@ -286,12 +290,10 @@ module Make (F : Cstubs.FOREIGN) = struct
 
   let js_to_c_string =
     foreign
-      (* const char *JS_ToCString(JSContext *ctx, JSValueConst val1) *)
       "JS_ToCString"
       (ptr js_context @-> js_value_const @-> returning string)
 
   let js_free_c_string =
-    (* void JS_FreeCString(JSContext *ctx, const char *ptr); *)
     foreign "JS_FreeCString" (ptr js_context @-> string @-> returning void)
 
   (* --- *)

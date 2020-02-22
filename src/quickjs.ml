@@ -4,10 +4,7 @@ module C = Quickjs_raw
 
 type runtime = C.js_runtime_ptr
 
-type context = {
-  rt: runtime;
-  ctx: C.js_context_ptr;
-}
+type context = C.js_context_ptr
 
 type bytecode = {
   ctx: context;
@@ -16,7 +13,7 @@ type bytecode = {
 
 type value = {
   ctx: context;
-  v: C.js_value;
+  jsval: C.js_value;
 }
 
 type js_exn = value
@@ -25,15 +22,19 @@ type 'a or_js_exn = ('a, js_exn) result
 
 (* --- *)
 
-let build_value (ctx : context) (v : C.js_value) : value =
-  let o = { ctx; v } in
-  Gc.finalise (fun { ctx; v } -> C.js_free_value ctx.ctx v) o;
+let build_value (ctx : context) (jsval : C.js_value) : value =
+  let o = { ctx; jsval } in
+  Gc.finalise (fun { ctx; jsval } -> C.js_free_value ctx jsval) o;
   o
+
+let get_raw_value o : C.js_value = o.jsval
 
 let build_bytecode (ctx : context) (bc : C.js_value) : bytecode =
   let o = { ctx; bc } in
-  Gc.finalise (fun { ctx; bc } -> C.js_free_value ctx.ctx bc) o;
+  Gc.finalise (fun { ctx; bc } -> C.js_free_value ctx bc) o;
   o
+
+let get_raw_bytecode bc : C.js_value = bc.bc
 
 (* --- *)
 
@@ -48,108 +49,105 @@ let set_gc_threshold = C.js_set_gc_threshold
 
 type interrupt_handler = runtime -> bool
 
-let set_interrupt_handler (rt : runtime) (callback : interrupt_handler) =
-  let handler runtime _opaque = if callback runtime then 0 else 1 in
-  let opaque = Ctypes.(to_voidp null) in
-  C.js_set_interrupt_handler rt handler opaque
+let set_interrupt_handler rt (handler : interrupt_handler) =
+  let callback runtime _opaque = if handler runtime then 0 else 1 in
+  let null_opaque = Ctypes.(to_voidp null) in
+  C.js_set_interrupt_handler rt callback null_opaque
 
 (* --- *)
 
-let new_context (rt : runtime) : context =
+let new_context rt : context =
   let ctx = C.js_new_context rt in
-  let r = { rt; ctx } in
-  let () = Gc.finalise (fun (obj : context) -> C.js_free_context obj.ctx) r in
-  r
+  let () = Gc.finalise (fun obj -> C.js_free_context obj) ctx in
+  ctx
 
-let set_max_stack_size (ctx : context) = C.js_set_max_stack_size ctx.ctx
+let set_max_stack_size = C.js_set_max_stack_size
 
-let get_runtime_from_context (ctx : context) = ctx.rt
+let get_runtime = C.js_get_runtime
 
 (* --- *)
 
-let get_exception (ctx : context) : value =
-  let v = C.js_get_exception ctx.ctx in
-  build_value ctx v
+let get_exception ctx : value =
+  let jsval = C.js_get_exception ctx in
+  build_value ctx jsval
 
-let check_exception (v : value) : value or_js_exn =
-  if C.js_is_exception v.v = 1 then Error (get_exception v.ctx) else Ok v
+let check_exception o : value or_js_exn =
+  if C.js_is_exception o.jsval = 1 then Error (get_exception o.ctx) else Ok o
 
 module Value = struct
-  let convert_to_string v : value =
-    let new_v = C.js_to_string v.ctx.ctx v.v in
-    build_value v.ctx new_v
+  let convert_to_string o : value =
+    let new_o = C.js_to_string o.ctx o.jsval in
+    build_value o.ctx new_o
 
-  let is_uninitialized v = C.js_is_uninitialized v.v = 1
+  let is_uninitialized o = C.js_is_uninitialized o.jsval = 1
 
-  let is_null v = C.js_is_null v.v = 1
+  let is_null o = C.js_is_null o.jsval <> 0
 
-  let is_undefined v = C.js_is_undefined v.v = 1
+  let is_undefined o = C.js_is_undefined o.jsval <> 0
 
-  let is_bool v = C.js_is_bool v.v = 1
+  let is_bool o = C.js_is_bool o.jsval <> 0
 
-  let is_number v = C.js_is_number v.v = 1
+  let is_number o = C.js_is_number o.jsval <> 0
 
-  let is_string v = C.js_is_string v.v = 1
+  let is_string o = C.js_is_string o.jsval <> 0
 
-  let is_symbol v = C.js_is_symbol v.v = 1
+  let is_symbol o = C.js_is_symbol o.jsval <> 0
 
-  let is_array v = C.js_is_array v.ctx.ctx v.v = 1
+  let is_array o = C.js_is_array o.ctx o.jsval <> 0
 
-  let is_object v = C.js_is_object v.v = 1
+  let is_object o = C.js_is_object o.jsval <> 0
 
-  let is_function v = C.js_is_function v.ctx.ctx v.v = 1
+  let is_function o = C.js_is_function o.ctx o.jsval <> 0
 
-  let is_constructor v = C.js_is_constructor v.ctx.ctx v.v = 1
+  let is_constructor o = C.js_is_constructor o.ctx o.jsval <> 0
 
-  let is_error v = C.js_is_error v.ctx.ctx v.v = 1
+  let is_error o = C.js_is_error o.ctx o.jsval <> 0
 
-  let is_exception v = C.js_is_exception v.v = 1
+  let is_exception o = C.js_is_exception o.jsval <> 0
 
-  let is_big_int v = C.js_is_big_int v.ctx.ctx v.v = 1
+  let is_big_int o = C.js_is_big_int o.ctx o.jsval <> 0
 
-  let is_big_float v = C.js_is_big_float v.v = 1
+  let is_big_float o = C.js_is_big_float o.jsval <> 0
 
-  let is_big_decimal v = C.js_is_big_decimal v.v = 1
+  let is_big_decimal o = C.js_is_big_decimal o.jsval <> 0
 
-  let is_instance_of v1 v2 =
-    if v1.ctx == v2.ctx
-    then C.js_is_instance_of v1.ctx.ctx v1.v v2.v = 1
+  let is_instance_of o1 o2 =
+    if o1.ctx == o2.ctx
+    then C.js_is_instance_of o1.ctx o1.jsval o2.jsval <> 0
     else false
 
-  let to_string v : string =
-    let r = C.js_to_c_string v.ctx.ctx v.v in
-    r
+  let to_string o : string =
+    let s = C.js_to_c_string o.ctx o.jsval in
+    (* FIXME: C.js_free_c_string *)
+    s
 
-  let to_bool v : bool or_js_exn =
-    let r = C.js_to_bool v.ctx.ctx v.v in
+  let to_bool o : bool or_js_exn =
+    let r = C.js_to_bool o.ctx o.jsval in
     match r with
-      | -1 -> Error (get_exception v.ctx)
+      | -1 -> Error (get_exception o.ctx)
       | 0 -> Ok false
       | _ -> Ok true
 
-  let to_xxx v p f =
-    let r = f v.ctx.ctx p v.v in
-    if r = 0 then Ok Ctypes.(!@p) else Error (get_exception v.ctx)
+  let to_xxx o ptr set_ptr =
+    let xxx = set_ptr o.ctx ptr o.jsval in
+    if xxx = 0 then Ok (Ctypes.( !@ ) ptr) else Error (get_exception o.ctx)
 
-  let to_int32 v =
-    let p = Ctypes.(allocate int32_t 0l) in
-    let f = C.js_to_int32 in
-    to_xxx v p f
+  let to_int32 o =
+    let ptr = Ctypes.(allocate int32_t 0l) in
+    to_xxx o ptr C.js_to_int32
 
-  let to_int64 v =
-    let p = Ctypes.(allocate int64_t 0L) in
-    let f = if is_big_int v then C.js_to_bigint64 else C.js_to_int64 in
-    to_xxx v p f
+  let to_int64 o =
+    let ptr = Ctypes.(allocate int64_t 0L) in
+    let f = if is_big_int o then C.js_to_bigint64 else C.js_to_int64 in
+    to_xxx o ptr f
 
-  let to_float v =
-    let p = Ctypes.(allocate double 0.0) in
-    let f = C.js_to_float64 in
-    to_xxx v p f
+  let to_float o =
+    let ptr = Ctypes.(allocate double 0.0) in
+    to_xxx o ptr C.js_to_float64
 
-  let to_uint32 v =
-    let p = Ctypes.(allocate uint32_t Unsigned.UInt32.zero) in
-    let f = C.js_to_uint32 in
-    to_xxx v p f
+  let to_uint32 o =
+    let ptr = Ctypes.(allocate uint32_t Unsigned.UInt32.zero) in
+    to_xxx o ptr C.js_to_uint32
 end
 
 (* --- *)
@@ -197,8 +195,8 @@ let raw_eval
   let ctx = get_or_default (lazy (new_runtime () |> new_context)) ctx in
   let flag = build_flag typ flags compile_only in
   let len = Unsigned.Size_t.of_int (String.length script) in
-  let v = C.js_eval ctx.ctx script len "input.js" flag in
-  build_value ctx v
+  let jsval = C.js_eval ctx script len "input.js" flag in
+  build_value ctx jsval
 
 let eval_unsafe
     ?(typ : eval_type option)
@@ -225,24 +223,12 @@ let compile
     (script : string)
     : bytecode or_js_exn
   =
-  let v = raw_eval true typ flags ctx script in
-  let v = check_exception v in
-  Result.map (fun v -> build_bytecode v.ctx v.v) v
+  let o = raw_eval true typ flags ctx script in
+  let o = check_exception o in
+  Result.map (fun o -> build_bytecode o.ctx o.jsval) o
 
 let execute (bc : bytecode) : value or_js_exn =
   let ctx = bc.ctx in
-  let r = C.js_eval_function ctx.ctx bc.bc in
+  let r = C.js_eval_function ctx bc.bc in
   let r = build_value ctx r in
   check_exception r
-
-(* --- *)
-
-module Raw = struct
-  let of_runtime (rt : runtime) = rt
-
-  let of_context (ctx : context) = ctx.ctx
-
-  let of_value (v : value) = v.v
-
-  let of_bytecode (bc : bytecode) = bc.bc
-end
