@@ -51,18 +51,7 @@ val get_runtime_from_context : context -> runtime
 
 val set_max_stack_size : context -> Unsigned.size_t -> unit
 
-val check_exception : value -> value or_js_exn
-(** [check_exception value] get exception obj from context.
-    {b Cannot be called twice with the same [value]}.
-{[
-let _ =
-  let open Quickjs in
-  let r = eval_unsafe script in
-  match check_exception r with
-  | Ok obj -> "it is safe to use " ^ (Value.to_string obj)
-  | Error js_exn -> "eval_unsafe throw " ^ (Value.to_string js_exn)
-]}
-*)
+(** {1 value} *)
 
 (** convert [value] to ocaml data *)
 module Value : sig
@@ -114,6 +103,19 @@ module Value : sig
 
   val to_float : value -> float or_js_exn
 end
+
+val check_exception : value -> value or_js_exn
+(** [check_exception value] get exception obj from context.
+    {b Cannot be called twice with the same [value]}.
+{[
+let _ =
+  let open Quickjs in
+  let r = eval_unsafe script in
+  match check_exception r with
+  | Ok obj -> "it is safe to use " ^ (Value.to_string obj)
+  | Error js_exn -> "eval_unsafe throw " ^ (Value.to_string js_exn)
+]}
+*)
 
 (** {1 eval} *)
 
