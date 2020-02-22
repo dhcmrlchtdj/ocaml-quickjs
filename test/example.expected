@@ -7,8 +7,18 @@ exception catched
 some string
 
 ###### test Value.is_xxx
-is_error
-Error: some error
+null | pass
+undefined | pass
+true | pass
+1 | pass
+"string" | pass
+Symbol() | pass
+[] | pass
+({obj:true}) | pass
+parseInt | pass
+String | pass
+new Error() | pass
+1n | pass
 
 ###### test Value.to_xxx
 true

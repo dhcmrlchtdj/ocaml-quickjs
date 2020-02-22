@@ -33,10 +33,32 @@ let _ =
 
 let _ =
   print_endline "\n###### test Value.is_xxx";
-  let script = {| new Error("some error") |} in
-  let+ err = Quickjs.eval script in
-  if Quickjs.Value.is_error err then print_endline "is_error";
-  print_endline (Quickjs.Value.to_string err)
+  let open Quickjs.Value in
+  let cases =
+    [
+      (is_null, "null");
+      (is_undefined, "undefined");
+      (is_bool, "true");
+      (is_number, "1");
+      (is_string, {|"string"|});
+      (is_symbol, "Symbol()");
+      (is_array, "[]");
+      (is_object, "({obj:true})");
+      (is_function, "parseInt");
+      (is_constructor, "String");
+      (is_error, "new Error()");
+      (is_big_int, "1n");
+      (* (is_big_decimal, "1m"); *)
+      (* (is_big_float, "1n"); *)
+    ]
+  in
+  let iter_f (f, s) =
+    let v = Quickjs.eval_unsafe s in
+    let r = if f v then s ^ " | pass" else s ^ " | fail" in
+    print_endline r
+  in
+
+  List.iter iter_f cases
 
 let _ =
   print_endline "\n###### test Value.to_xxx";

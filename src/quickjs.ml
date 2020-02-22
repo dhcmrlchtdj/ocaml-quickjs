@@ -154,7 +154,7 @@ end
 
 (* --- *)
 
-let variants2flag = function
+let get_flag = function
   | `GLOBAL -> C.define_JS_EVAL_TYPE_GLOBAL
   | `MODULE -> C.define_JS_EVAL_TYPE_MODULE
   | `STRICT -> C.define_JS_EVAL_FLAG_STRICT
@@ -182,11 +182,9 @@ let raw_eval
     : value
   =
   let build_flag typ flags compile_only =
-    let f = variants2flag typ in
-    let f = if compile_only then f lor variants2flag `COMPILE_ONLY else f in
-    let f =
-      List.fold_left (fun acc curr -> acc lor variants2flag curr) f flags
-    in
+    let f = get_flag typ in
+    let f = if compile_only then f lor get_flag `COMPILE_ONLY else f in
+    let f = List.fold_left (fun acc curr -> acc lor get_flag curr) f flags in
     f
   in
   let get_or_default default opt =
