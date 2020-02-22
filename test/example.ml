@@ -81,7 +81,8 @@ let _ =
     let count = ref 0 in
     let cb _runtime =
       incr count;
-      !count = 2
+      print_endline "run once";
+      !count < 1
     in
     Quickjs.set_interrupt_handler rt cb
   in

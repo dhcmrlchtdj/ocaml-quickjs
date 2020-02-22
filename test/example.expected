@@ -20,4 +20,5 @@ true
 6765
 
 ###### test interrupt_handler
+run once
 InternalError: interrupted
