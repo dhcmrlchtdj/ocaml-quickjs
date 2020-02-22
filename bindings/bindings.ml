@@ -397,6 +397,7 @@ module Make (F : Cstubs.FOREIGN) = struct
       )
   *)
 
+  (*
   type js_c_function_list_entry
 
   let js_c_function_list_entry : js_c_function_list_entry structure typ =
@@ -412,6 +413,7 @@ module Make (F : Cstubs.FOREIGN) = struct
       @-> int
       @-> returning void
       )
+  *)
 
   (* --- *)
 
