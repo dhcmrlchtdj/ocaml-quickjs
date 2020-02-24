@@ -61,6 +61,13 @@ val get_runtime : context -> runtime
 
 val set_max_stack_size : context -> Unsigned.size_t -> unit
 
+val enable_bignum_ext : context -> unit
+(** enable math mode support.
+    @see <https://bellard.org/quickjs/jsbignum.html#Math-mode>
+    *)
+
+val disable_bignum_ext : context -> unit
+
 (** {1 value} *)
 
 (** convert [value] to ocaml data *)

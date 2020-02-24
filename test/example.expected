@@ -21,6 +21,8 @@ parseInt | pass
 String | pass
 new Error() | pass
 1n | pass
+1m | pass
+1l | pass
 
 ###### test Value.to_xxx
 true

@@ -134,6 +134,79 @@ module Make (F : Cstubs.FOREIGN) = struct
     (* void JS_SetMaxStackSize(JSContext *ctx, size_t stack_size); *)
     foreign "JS_SetMaxStackSize" (ptr js_context @-> size_t @-> returning void)
 
+  let js_enable_bignum_ext =
+    (* void JS_EnableBignumExt(JSContext *ctx, JS_BOOL enable); *)
+    foreign "JS_EnableBignumExt" (ptr js_context @-> js_bool @-> returning void)
+
+  (* --- *)
+
+  (*
+  JSContext *JS_NewContextRaw(JSRuntime *rt);
+  void JS_AddIntrinsicBaseObjects(JSContext *ctx);
+  void JS_AddIntrinsicDate(JSContext *ctx);
+  void JS_AddIntrinsicEval(JSContext *ctx);
+  void JS_AddIntrinsicStringNormalize(JSContext *ctx);
+  void JS_AddIntrinsicRegExpCompiler(JSContext *ctx);
+  void JS_AddIntrinsicRegExp(JSContext *ctx);
+  void JS_AddIntrinsicJSON(JSContext *ctx);
+  void JS_AddIntrinsicProxy(JSContext *ctx);
+  void JS_AddIntrinsicMapSet(JSContext *ctx);
+  void JS_AddIntrinsicTypedArrays(JSContext *ctx);
+  void JS_AddIntrinsicPromise(JSContext *ctx);
+  void JS_AddIntrinsicBigInt(JSContext *ctx);
+  void JS_AddIntrinsicBigFloat(JSContext *ctx);
+  void JS_AddIntrinsicBigDecimal(JSContext *ctx);
+  void JS_AddIntrinsicOperators(JSContext *ctx);
+  *)
+
+  let js_new_context_raw =
+    foreign "JS_NewContextRaw" (ptr js_runtime @-> returning (ptr js_context))
+
+  let js_add_instrinsic_base_objects =
+    foreign "JS_AddIntrinsicBaseObjects" (ptr js_context @-> returning void)
+
+  let js_add_instrinsic_date =
+    foreign "JS_AddIntrinsicDate" (ptr js_context @-> returning void)
+
+  let js_add_instrinsic_eval =
+    foreign "JS_AddIntrinsicEval" (ptr js_context @-> returning void)
+
+  let js_add_instrinsic_string_normalize =
+    foreign "JS_AddIntrinsicStringNormalize" (ptr js_context @-> returning void)
+
+  let js_add_instrinsic_regexp_compiler =
+    foreign "JS_AddIntrinsicRegExpCompiler" (ptr js_context @-> returning void)
+
+  let js_add_instrinsic_regexp =
+    foreign "JS_AddIntrinsicRegExp" (ptr js_context @-> returning void)
+
+  let js_add_instrinsic_json =
+    foreign "JS_AddIntrinsicJSON" (ptr js_context @-> returning void)
+
+  let js_add_instrinsic_proxy =
+    foreign "JS_AddIntrinsicProxy" (ptr js_context @-> returning void)
+
+  let js_add_instrinsic_map_set =
+    foreign "JS_AddIntrinsicMapSet" (ptr js_context @-> returning void)
+
+  let js_add_instrinsic_typed_arrays =
+    foreign "JS_AddIntrinsicTypedArrays" (ptr js_context @-> returning void)
+
+  let js_add_instrinsic_promise =
+    foreign "JS_AddIntrinsicPromise" (ptr js_context @-> returning void)
+
+  let js_add_instrinsic_big_int =
+    foreign "JS_AddIntrinsicBigInt" (ptr js_context @-> returning void)
+
+  let js_add_instrinsic_big_float =
+    foreign "JS_AddIntrinsicBigFloat" (ptr js_context @-> returning void)
+
+  let js_add_instrinsic_big_decimal =
+    foreign "JS_AddIntrinsicBigDecimal" (ptr js_context @-> returning void)
+
+  let js_add_instrinsic_operators =
+    foreign "JS_AddIntrinsicOperators" (ptr js_context @-> returning void)
+
   (* --- *)
 
   let js_free_value =

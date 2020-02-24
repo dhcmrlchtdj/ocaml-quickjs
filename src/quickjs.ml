@@ -66,13 +66,21 @@ let set_interrupt_handler rt (handler : interrupt_handler) =
 (* --- *)
 
 let new_context rt : context =
-  let ctx = { rt; ctx = C.js_new_context rt } in
+  let ctx = C.js_new_context rt in
+  C.js_add_instrinsic_operators ctx;
+  C.js_add_instrinsic_big_float ctx;
+  C.js_add_instrinsic_big_decimal ctx;
+  let ctx = { rt; ctx } in
   let () = Gc.finalise (fun (obj : context) -> C.js_free_context obj.ctx) ctx in
   ctx
 
+let get_runtime ctx = ctx.rt
+
 let set_max_stack_size (ctx : context) = C.js_set_max_stack_size ctx.ctx
 
-let get_runtime ctx = ctx.rt
+let enable_bignum_ext (ctx : context) = C.js_enable_bignum_ext ctx.ctx 1
+
+let disable_bignum_ext (ctx : context) = C.js_enable_bignum_ext ctx.ctx 0
 
 (* --- *)
 

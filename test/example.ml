@@ -50,30 +50,33 @@ let _ =
     then print_endline "convert_to_string | pass"
     else print_endline "convert_to_string | fail"
   in
-  let cases =
-    [
-      (is_null, "null");
-      (is_undefined, "undefined");
-      (is_bool, "true");
-      (is_number, "1");
-      (is_string, {|"string"|});
-      (is_symbol, "Symbol()");
-      (is_array, "[]");
-      (is_object, "({obj:true})");
-      (is_function, "parseInt");
-      (is_constructor, "String");
-      (is_error, "new Error()");
-      (is_big_int, "1n");
-      (* (is_big_decimal, "1m"); *)
-      (* (is_big_float, "1n"); *)
-    ]
+  let _ =
+    let cases =
+      [
+        (is_null, "null");
+        (is_undefined, "undefined");
+        (is_bool, "true");
+        (is_number, "1");
+        (is_string, {|"string"|});
+        (is_symbol, "Symbol()");
+        (is_array, "[]");
+        (is_object, "({obj:true})");
+        (is_function, "parseInt");
+        (is_constructor, "String");
+        (is_error, "new Error()");
+        (is_big_int, "1n");
+        (is_big_decimal, "1m");
+        (is_big_float, "1l");
+      ]
+    in
+    let iter_f (f, s) =
+      let v = Quickjs.eval_unsafe s in
+      let r = if f v then s ^ " | pass" else s ^ " | fail" in
+      print_endline r
+    in
+    List.iter iter_f cases
   in
-  let iter_f (f, s) =
-    let v = Quickjs.eval_unsafe s in
-    let r = if f v then s ^ " | pass" else s ^ " | fail" in
-    print_endline r
-  in
-  List.iter iter_f cases
+  ()
 
 let _ =
   print_endline "\n###### test Value.to_xxx";
@@ -108,7 +111,7 @@ let _ =
     fib(20)
     |}
   in
-  let* bc = Quickjs.compile fib20 in
+  let* bc = Quickjs.compile ~flags:[`STRIP] fib20 in
   let* r = Quickjs.execute bc in
   let* r = Quickjs.Value.to_int32 r in
   print_endline (Int32.to_string r);
