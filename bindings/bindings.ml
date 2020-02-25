@@ -35,7 +35,7 @@ module NOT_JS_NAN_BOXING : S_BOXING_OR_NOT = struct
     t
 end
 
-let box_or_not : (module S_BOXING_OR_NOT) =
+let boxing_or_not : (module S_BOXING_OR_NOT) =
   if Constants.define_JS_NAN_BOXING
   then
     ( module struct
@@ -48,7 +48,7 @@ let box_or_not : (module S_BOXING_OR_NOT) =
     end
     )
 
-module BOXING_OR_NOT = (val box_or_not : S_BOXING_OR_NOT)
+module BOXING_OR_NOT = (val boxing_or_not : S_BOXING_OR_NOT)
 
 module Make (F : Cstubs.FOREIGN) = struct
   open F

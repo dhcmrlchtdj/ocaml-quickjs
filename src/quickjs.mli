@@ -1,4 +1,6 @@
-(** QuickJS *)
+(** OCaml bindings to QuickJS.
+    @see <https://bellard.org/quickjs/quickjs.html>
+   *)
 
 (** {1 type} *)
 

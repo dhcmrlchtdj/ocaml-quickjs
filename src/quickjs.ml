@@ -2,7 +2,7 @@ module C = Quickjs_raw
 
 (* --- *)
 
-type runtime = C.js_runtime_ptr
+type runtime = { rt: C.js_runtime_ptr }
 
 type context = {
   rt: runtime;
@@ -25,7 +25,7 @@ type 'a or_js_exn = ('a, js_exn) result
 
 (* --- *)
 
-let get_raw_runtime (rt : runtime) = rt
+let get_raw_runtime (rt : runtime) = rt.rt
 
 let get_raw_context (ctx : context) = ctx.ctx
 
@@ -48,34 +48,34 @@ let build_bytecode (ctx : context) (bc : C.js_value) : bytecode =
 (* --- *)
 
 let new_runtime () : runtime =
-  let rt = C.js_new_runtime () in
-  let () = Gc.finalise (fun obj -> C.js_free_runtime obj) rt in
+  let rt = { rt = C.js_new_runtime () } in
+  let () = Gc.finalise (fun (obj : runtime) -> C.js_free_runtime obj.rt) rt in
   rt
 
-let set_memory_limit = C.js_set_memory_limit
+let set_memory_limit (rt : runtime) = C.js_set_memory_limit rt.rt
 
-let set_gc_threshold = C.js_set_gc_threshold
+let set_gc_threshold (rt : runtime) = C.js_set_gc_threshold rt.rt
 
-let run_gc = C.js_run_gc
+let run_gc (rt : runtime) = C.js_run_gc rt.rt
 
-let compute_memory_usage rt =
+let compute_memory_usage (rt : runtime) =
   let stats = Ctypes.make C.MemoryUsage.js_memory_usage in
-  let () = C.js_compute_memory_usage rt (Ctypes.addr stats) in
+  let () = C.js_compute_memory_usage rt.rt (Ctypes.addr stats) in
   C.MemoryUsage.to_record stats
 
 let memory_usage_to_string = C.MemoryUsage.show
 
 type interrupt_handler = runtime -> bool
 
-let set_interrupt_handler rt (handler : interrupt_handler) =
-  let callback runtime _opaque = if handler runtime then 0 else 1 in
+let set_interrupt_handler (rt : runtime) (handler : interrupt_handler) =
+  let callback _runtime _opaque = if handler rt then 0 else 1 in
   let null_opaque = Ctypes.(to_voidp null) in
-  C.js_set_interrupt_handler rt callback null_opaque
+  C.js_set_interrupt_handler rt.rt callback null_opaque
 
 (* --- *)
 
-let new_context rt : context =
-  let ctx = C.js_new_context rt in
+let new_context (rt : runtime) : context =
+  let ctx = C.js_new_context rt.rt in
   C.js_add_instrinsic_operators ctx;
   C.js_add_instrinsic_big_float ctx;
   C.js_add_instrinsic_big_decimal ctx;
