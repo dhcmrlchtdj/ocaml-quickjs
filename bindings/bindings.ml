@@ -116,6 +116,10 @@ module Make (F : Cstubs.FOREIGN) = struct
     (* void JS_SetGCThreshold(JSRuntime *rt, size_t gc_threshold); *)
     foreign "JS_SetGCThreshold" (ptr js_runtime @-> size_t @-> returning void)
 
+  let js_run_gc =
+    (* void JS_RunGC(JSRuntime *rt); *)
+    foreign "JS_RunGC" (ptr js_runtime @-> returning void)
+
   (* --- *)
 
   let js_new_context =

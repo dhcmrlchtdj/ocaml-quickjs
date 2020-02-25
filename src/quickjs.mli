@@ -48,6 +48,8 @@ val set_memory_limit : runtime -> Unsigned.size_t -> unit
 
 val set_gc_threshold : runtime -> Unsigned.size_t -> unit
 
+val run_gc : runtime -> unit
+
 type interrupt_handler = runtime -> bool
 (** [interrupt_handler runtime], return false will interrupt runtime *)
 

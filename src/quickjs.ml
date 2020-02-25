@@ -56,6 +56,8 @@ let set_memory_limit = C.js_set_memory_limit
 
 let set_gc_threshold = C.js_set_gc_threshold
 
+let run_gc = C.js_run_gc
+
 type interrupt_handler = runtime -> bool
 
 let set_interrupt_handler rt (handler : interrupt_handler) =
