@@ -111,7 +111,7 @@ let _ =
     fib(20)
     |}
   in
-  let* bc = Quickjs.compile ~flags:[`STRIP] fib20 in
+  let* bc = Quickjs.compile fib20 in
   let* r = Quickjs.execute bc in
   let* r = Quickjs.Value.to_int32 r in
   print_endline (Int32.to_string r);
