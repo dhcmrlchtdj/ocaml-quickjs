@@ -1,0 +1,11 @@
+(tests
+ (names
+  bytecode
+  catch_exception
+  check_js_type
+  eval_fib
+  gc
+  interrupt
+  value_to_ocaml
+  )
+ (libraries quickjs))

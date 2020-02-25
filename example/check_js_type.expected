@@ -1,0 +1,16 @@
+instanceof | pass
+convert_to_string | pass
+null | pass
+undefined | pass
+true | pass
+1 | pass
+"string" | pass
+Symbol() | pass
+[] | pass
+({obj:true}) | pass
+parseInt | pass
+String | pass
+new Error() | pass
+1n | pass
+1m | pass
+1l | pass
