@@ -1,9 +1,0 @@
-{ Bindings.Make.MemoryUsage.malloc_limit = -1L; malloc_count = 228L;
-  malloc_size = 14384L; memory_used_count = 228L; memory_used_size = 10919L;
-  atom_count = 223L; atom_size = 9271L; str_count = 0L; str_size = 0L;
-  obj_count = 0L; obj_size = 0L; prop_count = 0L; prop_size = 0L;
-  shape_count = 0L; shape_size = 0L; js_func_count = 0L; js_func_size = 0L;
-  js_func_code_size = 0L; js_func_pc2line_count = 0L;
-  js_func_pc2line_size = 0L; c_func_count = 0L; array_count = 0L;
-  fast_array_count = 0L; fast_array_elements = 0L; binary_object_count = 0L;
-  binary_object_size = 0L }
