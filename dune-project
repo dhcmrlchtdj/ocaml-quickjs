@@ -18,6 +18,7 @@
   (ocaml                (and (>= 4.09.0)))
   (ctypes               (and (>= 0.16.0)))
   (ctypes-foreign       (and (>= 0.4.0)))
+  (ppx_deriving         (and (>= 4.4.1)))
   (dune                 (and :build (>= 2.3.0)))
   (dune-configurator    (and :build (>= 2.3.0)))
   (ocamlformat          (and :dev (>= 0.13.0)))

@@ -15,27 +15,24 @@ end
 module NOT_JS_NAN_BOXING : S_BOXING_OR_NOT = struct
   type js_value_union
 
-  let js_value_union : js_value_union union typ = union "JSValueUnion"
-
-  let _ = field js_value_union "int32" int32_t
-
-  let _ = field js_value_union "float64" double
-
-  let _ = field js_value_union "ptr" (ptr void)
-
-  let () = seal js_value_union
+  let js_value_union : js_value_union union typ =
+    let t = union "JSValueUnion" in
+    let _ = field t "int32" int32_t in
+    let _ = field t "float64" double in
+    let _ = field t "ptr" (ptr void) in
+    let _ = seal t in
+    t
 
   type _js_value
 
   type js_value = _js_value structure
 
-  let js_value : js_value typ = structure "JSValue"
-
-  let _ = field js_value "u" js_value_union
-
-  let _ = field js_value "tag" int64_t
-
-  let () = seal js_value
+  let js_value : js_value typ =
+    let t = structure "JSValue" in
+    let _ = field t "u" js_value_union in
+    let _ = field t "tag" int64_t in
+    let _ = seal t in
+    t
 end
 
 let box_or_not : (module S_BOXING_OR_NOT) =
@@ -119,6 +116,142 @@ module Make (F : Cstubs.FOREIGN) = struct
   let js_run_gc =
     (* void JS_RunGC(JSRuntime *rt); *)
     foreign "JS_RunGC" (ptr js_runtime @-> returning void)
+
+  (* --- *)
+
+  module MemoryUsage = struct
+    type _js_memory_usage
+
+    type js_memory_usage = _js_memory_usage structure
+
+    let js_memory_usage : js_memory_usage typ = structure "JSMemoryUsage"
+
+    let malloc_size = field js_memory_usage "malloc_size" int64_t
+
+    let malloc_limit = field js_memory_usage "malloc_limit" int64_t
+
+    let memory_used_size = field js_memory_usage "memory_used_size" int64_t
+
+    let malloc_count = field js_memory_usage "malloc_count" int64_t
+
+    let memory_used_count = field js_memory_usage "memory_used_count" int64_t
+
+    let atom_count = field js_memory_usage "atom_count" int64_t
+
+    let atom_size = field js_memory_usage "atom_size" int64_t
+
+    let str_count = field js_memory_usage "str_count" int64_t
+
+    let str_size = field js_memory_usage "str_size" int64_t
+
+    let obj_count = field js_memory_usage "obj_count" int64_t
+
+    let obj_size = field js_memory_usage "obj_size" int64_t
+
+    let prop_count = field js_memory_usage "prop_count" int64_t
+
+    let prop_size = field js_memory_usage "prop_size" int64_t
+
+    let shape_count = field js_memory_usage "shape_count" int64_t
+
+    let shape_size = field js_memory_usage "shape_size" int64_t
+
+    let js_func_count = field js_memory_usage "js_func_count" int64_t
+
+    let js_func_size = field js_memory_usage "js_func_size" int64_t
+
+    let js_func_code_size = field js_memory_usage "js_func_code_size" int64_t
+
+    let js_func_pc2line_count =
+      field js_memory_usage "js_func_pc2line_count" int64_t
+
+    let js_func_pc2line_size =
+      field js_memory_usage "js_func_pc2line_size" int64_t
+
+    let c_func_count = field js_memory_usage "c_func_count" int64_t
+
+    let array_count = field js_memory_usage "array_count" int64_t
+
+    let fast_array_count = field js_memory_usage "fast_array_count" int64_t
+
+    let fast_array_elements =
+      field js_memory_usage "fast_array_elements" int64_t
+
+    let binary_object_count =
+      field js_memory_usage "binary_object_count" int64_t
+
+    let binary_object_size = field js_memory_usage "binary_object_size" int64_t
+
+    let _ = seal js_memory_usage
+
+    (* for ocaml *)
+
+    type t = {
+      malloc_limit: Int64.t;
+      malloc_count: Int64.t;
+      malloc_size: Int64.t;
+      memory_used_count: Int64.t;
+      memory_used_size: Int64.t;
+      atom_count: Int64.t;
+      atom_size: Int64.t;
+      str_count: Int64.t;
+      str_size: Int64.t;
+      obj_count: Int64.t;
+      obj_size: Int64.t;
+      prop_count: Int64.t;
+      prop_size: Int64.t;
+      shape_count: Int64.t;
+      shape_size: Int64.t;
+      js_func_count: Int64.t;
+      js_func_size: Int64.t;
+      js_func_code_size: Int64.t;
+      js_func_pc2line_count: Int64.t;
+      js_func_pc2line_size: Int64.t;
+      c_func_count: Int64.t;
+      array_count: Int64.t;
+      fast_array_count: Int64.t;
+      fast_array_elements: Int64.t;
+      binary_object_count: Int64.t;
+      binary_object_size: Int64.t;
+    }
+    [@@deriving show]
+
+    let to_record js_memory_usage =
+      {
+        malloc_limit = getf js_memory_usage malloc_limit;
+        malloc_count = getf js_memory_usage malloc_count;
+        malloc_size = getf js_memory_usage malloc_size;
+        memory_used_count = getf js_memory_usage memory_used_count;
+        memory_used_size = getf js_memory_usage memory_used_size;
+        atom_count = getf js_memory_usage atom_count;
+        atom_size = getf js_memory_usage atom_size;
+        str_count = getf js_memory_usage str_count;
+        str_size = getf js_memory_usage str_size;
+        obj_count = getf js_memory_usage obj_count;
+        obj_size = getf js_memory_usage obj_size;
+        prop_count = getf js_memory_usage prop_count;
+        prop_size = getf js_memory_usage prop_size;
+        shape_count = getf js_memory_usage shape_count;
+        shape_size = getf js_memory_usage shape_size;
+        js_func_count = getf js_memory_usage js_func_count;
+        js_func_size = getf js_memory_usage js_func_size;
+        js_func_code_size = getf js_memory_usage js_func_code_size;
+        js_func_pc2line_count = getf js_memory_usage js_func_pc2line_count;
+        js_func_pc2line_size = getf js_memory_usage js_func_pc2line_size;
+        c_func_count = getf js_memory_usage c_func_count;
+        array_count = getf js_memory_usage array_count;
+        fast_array_count = getf js_memory_usage fast_array_count;
+        fast_array_elements = getf js_memory_usage fast_array_elements;
+        binary_object_count = getf js_memory_usage binary_object_count;
+        binary_object_size = getf js_memory_usage binary_object_size;
+      }
+  end
+
+  let js_compute_memory_usage =
+    (* void JS_ComputeMemoryUsage(JSRuntime *rt, JSMemoryUsage *s); *)
+    foreign
+      "JS_ComputeMemoryUsage"
+      (ptr js_runtime @-> ptr MemoryUsage.js_memory_usage @-> returning void)
 
   (* --- *)
 

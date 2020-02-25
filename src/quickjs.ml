@@ -58,6 +58,13 @@ let set_gc_threshold = C.js_set_gc_threshold
 
 let run_gc = C.js_run_gc
 
+let compute_memory_usage rt =
+  let stats = Ctypes.make C.MemoryUsage.js_memory_usage in
+  let () = C.js_compute_memory_usage rt (Ctypes.addr stats) in
+  C.MemoryUsage.to_record stats
+
+let memory_usage_to_string = C.MemoryUsage.show
+
 type interrupt_handler = runtime -> bool
 
 let set_interrupt_handler rt (handler : interrupt_handler) =
@@ -258,7 +265,7 @@ let compile
   =
   let o = raw_eval true typ flags ctx script in
   let o = check_exception o in
-  Result.map (fun o -> build_bytecode o.ctx o.jsval) o
+  Stdlib.Result.map (fun o -> build_bytecode o.ctx o.jsval) o
 
 let execute (bc : bytecode) : value or_js_exn =
   let ctx = bc.ctx in

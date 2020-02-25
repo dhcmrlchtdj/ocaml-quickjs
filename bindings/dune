@@ -2,7 +2,9 @@
  (public_name quickjs.bindings)
  (name bindings)
  (modules constants bindings)
- (libraries ctypes ctypes.stubs ctypes.foreign))
+ (libraries ctypes ctypes.stubs ctypes.foreign)
+ (preprocess
+  (pps ppx_deriving.show)))
 
 (rule
  (targets constants.ml)

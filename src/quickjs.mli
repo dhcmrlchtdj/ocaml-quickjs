@@ -50,6 +50,10 @@ val set_gc_threshold : runtime -> Unsigned.size_t -> unit
 
 val run_gc : runtime -> unit
 
+val compute_memory_usage : runtime -> Quickjs_raw.MemoryUsage.t
+
+val memory_usage_to_string : Quickjs_raw.MemoryUsage.t -> string
+
 type interrupt_handler = runtime -> bool
 (** [interrupt_handler runtime], return false will interrupt runtime *)
 

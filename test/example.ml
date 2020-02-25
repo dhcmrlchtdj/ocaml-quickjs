@@ -1,4 +1,4 @@
-let ( let* ) = Result.bind
+let ( let* ) = Stdlib.Result.bind
 
 let ok_unit = Ok ()
 
@@ -20,6 +20,7 @@ let _ =
   let* r = Quickjs.eval ~ctx "fib(20)" in
   let* r = Quickjs.Value.to_int32 r in
   print_endline (Int32.to_string r);
+  (* let () = Quickjs.compute_memory_usage (Quickjs.get_runtime ctx) |> Quickjs.memory_usage_to_string  |> print_endline in *)
   ok_unit
 
 let _ =
