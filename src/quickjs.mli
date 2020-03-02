@@ -170,7 +170,7 @@ val eval_unsafe
   ?flags:eval_flag list ->
   ?ctx:context ->
   string ->
-  js_exn
+  value
 (** [eval_unsafe ~typ ~flags ~ctx script], you must check exception by yourself. {!val:check_exception} *)
 
 val compile
