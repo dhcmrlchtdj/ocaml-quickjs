@@ -145,7 +145,7 @@ module Value = struct
   let to_string o : string option =
     let rec aux (buf : Buffer.t) (char_ptr : char Ctypes.ptr) : string =
       let ch = Ctypes.(!@char_ptr) in
-      if ch = '\000'
+      if Char.equal ch '\000'
       then Buffer.contents buf
       else (
         Buffer.add_char buf ch;

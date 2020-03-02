@@ -1,0 +1,28 @@
+name: ci
+
+on: [push, pull_request]
+
+jobs:
+    ci:
+        strategy:
+            matrix:
+                operating-system: [macos-latest, ubuntu-latest]
+                ocaml-version: [ '4.09.0+flambda', '4.10.0+flambda' ]
+        runs-on: ${{ matrix.operating-system }}
+        steps:
+            - uses: actions/checkout@v2.0.0
+            - uses: avsm/setup-ocaml@v1.0
+              with:
+                  ocaml-version: ${{ matrix.ocaml-version }}
+            - uses: actions/cache@v1.1.2
+              with:
+                  path: ~/.opam/download-cache/
+                  key: ${{ runner.os }}-ocaml-opam-${{ hashFiles('dune-project') }}
+                  restore-keys: |
+                      ${{ runner.os }}-ocaml-opam-
+            - run: make dep
+            - run: make coverage
+            - uses: codecov/codecov-action@v1.0.5
+              with:
+                  token: ${{ secrets.CODECOV_TOKEN }}
+                  file: ./_coverage/coverage.json

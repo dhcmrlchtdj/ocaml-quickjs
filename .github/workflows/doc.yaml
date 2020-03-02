@@ -1,0 +1,27 @@
+name: doc
+
+on:
+    push:
+        branches:
+            - master
+
+jobs:
+    doc:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2.0.0
+            - uses: avsm/setup-ocaml@v1.0
+              with:
+                  ocaml-version: '4.10.0+flambda'
+            - uses: actions/cache@v1.1.2
+              with:
+                  path: ~/.opam/download-cache/
+                  key: ${{ runner.os }}-ocaml-opam-${{ hashFiles('dune-project') }}
+                  restore-keys: |
+                      ${{ runner.os }}-ocaml-opam-
+            - run: make dep
+            - run: make doc
+            - uses: peaceiris/actions-gh-pages@v3.0.3
+              with:
+                  deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
+                  publish_dir: ./_build/default/_doc/_html/
