@@ -80,61 +80,84 @@ type js_func = context -> value -> value list -> value
 (** [context -> this -> arguments] *)
 
 val add_func : context -> js_func -> string -> int -> value or_js_exn
-(** [add_func ctx func name argc] export [func] to [context]
+(** [add_func context func name argc] export [func] to [context]
+    return the js function created
     *)
 
 (** {1 value} *)
 
 (** convert [value] to ocaml data *)
 module Value : sig
-  val convert_to_string : value -> value
+  module New : sig
+    val jsval : context -> Quickjs_raw.js_value -> value
 
-  val is_uninitialized : value -> bool
+    val bool : context -> bool -> Quickjs_raw.js_value
 
-  val is_null : value -> bool
+    val string : context -> string -> Quickjs_raw.js_value
 
-  val is_undefined : value -> bool
+    val int32 : context -> Int32.t -> Quickjs_raw.js_value
 
-  val is_bool : value -> bool
+    val int64 : context -> Int64.t -> Quickjs_raw.js_value
 
-  val is_number : value -> bool
+    val float : context -> float -> Quickjs_raw.js_value
 
-  val is_string : value -> bool
+    val big_int64 : context -> Int64.t -> Quickjs_raw.js_value
 
-  val is_symbol : value -> bool
+    val big_uint64 : context -> Unsigned.uint64 -> Quickjs_raw.js_value
+  end
 
-  val is_array : value -> bool
+  module Is : sig
+    val uninitialized : value -> bool
 
-  val is_object : value -> bool
+    val null : value -> bool
 
-  val is_function : value -> bool
+    val undefined : value -> bool
 
-  val is_constructor : value -> bool
+    val bool : value -> bool
 
-  val is_error : value -> bool
+    val number : value -> bool
 
-  val is_exception : value -> bool
+    val string : value -> bool
 
-  val is_big_int : value -> bool
+    val symbol : value -> bool
 
-  val is_big_float : value -> bool
+    val array : value -> bool
 
-  val is_big_decimal : value -> bool
+    val js_object : value -> bool
 
-  val is_instance_of : value -> value -> bool
+    val js_function : value -> bool
 
-  val to_bool : value -> bool or_js_exn
+    val constructor : value -> bool
 
-  val to_int32 : value -> int32 or_js_exn
+    val error : value -> bool
 
-  val to_uint32 : value -> Unsigned.uint32 or_js_exn
+    val js_exception : value -> bool
 
-  val to_int64 : value -> int64 or_js_exn
+    val big_int : value -> bool
 
-  val to_float : value -> float or_js_exn
+    val big_float : value -> bool
 
-  val to_string : value -> string option
-  (** return [None] if value return a null string *)
+    val big_decimal : value -> bool
+
+    val instance_of : value -> value -> bool
+  end
+
+  module To : sig
+    val string_value : value -> value
+
+    val string : value -> string option
+    (** return [None] if value return a null string *)
+
+    val bool : value -> bool or_js_exn
+
+    val int32 : value -> int32 or_js_exn
+
+    val uint32 : value -> Unsigned.uint32 or_js_exn
+
+    val int64 : value -> int64 or_js_exn
+
+    val float : value -> float or_js_exn
+  end
 end
 
 val check_exception : value -> value or_js_exn

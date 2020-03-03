@@ -17,6 +17,6 @@ let _ =
   in
   let* bc = Quickjs.compile ~flags:[ `STRIP; `STRICT ] fib20 in
   let* r = Quickjs.execute bc in
-  let* r = Quickjs.Value.to_int32 r in
+  let* r = Quickjs.Value.To.int32 r in
   print_endline (Int32.to_string r);
   ok_unit

@@ -29,4 +29,4 @@ let _ =
   let r = Quickjs.eval ~ctx fib in
   match r with
     | Ok _ -> assert false
-    | Error e -> print_endline (Quickjs.Value.to_string e |> Option.get)
+    | Error e -> print_endline (Quickjs.Value.To.string e |> Option.get)

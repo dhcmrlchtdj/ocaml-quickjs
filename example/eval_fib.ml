@@ -17,6 +17,6 @@ let _ =
   let ctx = Quickjs.new_runtime () |> Quickjs.new_context in
   let* _ = Quickjs.eval ~ctx fib in
   let* r = Quickjs.eval ~ctx "fib(20)" in
-  let* r = Quickjs.Value.to_int32 r in
+  let* r = Quickjs.Value.To.int32 r in
   print_endline (Int32.to_string r);
   ok_unit

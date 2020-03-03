@@ -129,93 +129,116 @@ let add_func (ctx : context) (func : js_func) (name : string) (argc : int)
 (* --- *)
 
 module Value = struct
-  let convert_to_string o : value =
-    let new_o = C.js_to_string o.ctx.ctx o.jsval in
-    build_value o.ctx new_o
+  module New = struct
+    let jsval = build_value
 
-  let is_uninitialized o = C.js_is_uninitialized o.jsval = 1
+    let bool (ctx : context) b = C.js_new_bool ctx.ctx (if b then 0 else 1)
 
-  let is_null o = C.js_is_null o.jsval <> 0
+    let string (ctx : context) s = C.js_new_string ctx.ctx s
 
-  let is_undefined o = C.js_is_undefined o.jsval <> 0
+    let int32 (ctx : context) (n : Int32.t) = C.js_new_int32 ctx.ctx n
 
-  let is_bool o = C.js_is_bool o.jsval <> 0
+    let int64 (ctx : context) (n : Int64.t) = C.js_new_int64 ctx.ctx n
 
-  let is_number o = C.js_is_number o.jsval <> 0
+    let float (ctx : context) (n : float) = C.js_new_float64 ctx.ctx n
 
-  let is_string o = C.js_is_string o.jsval <> 0
+    let big_int64 (ctx : context) (n : Int64.t) = C.js_new_big_int64 ctx.ctx n
 
-  let is_symbol o = C.js_is_symbol o.jsval <> 0
+    let big_uint64 (ctx : context) (n : Unsigned.uint64) =
+      C.js_new_big_uint64 ctx.ctx n
+  end
 
-  let is_array o = C.js_is_array o.ctx.ctx o.jsval <> 0
+  module Is = struct
+    let uninitialized o = C.js_is_uninitialized o.jsval = 1
 
-  let is_object o = C.js_is_object o.jsval <> 0
+    let null o = C.js_is_null o.jsval <> 0
 
-  let is_function o = C.js_is_function o.ctx.ctx o.jsval <> 0
+    let undefined o = C.js_is_undefined o.jsval <> 0
 
-  let is_constructor o = C.js_is_constructor o.ctx.ctx o.jsval <> 0
+    let bool o = C.js_is_bool o.jsval <> 0
 
-  let is_error o = C.js_is_error o.ctx.ctx o.jsval <> 0
+    let number o = C.js_is_number o.jsval <> 0
 
-  let is_exception o = C.js_is_exception o.jsval <> 0
+    let string o = C.js_is_string o.jsval <> 0
 
-  let is_big_int o = C.js_is_big_int o.ctx.ctx o.jsval <> 0
+    let symbol o = C.js_is_symbol o.jsval <> 0
 
-  let is_big_float o = C.js_is_big_float o.jsval <> 0
+    let array o = C.js_is_array o.ctx.ctx o.jsval <> 0
 
-  let is_big_decimal o = C.js_is_big_decimal o.jsval <> 0
+    let js_object o = C.js_is_object o.jsval <> 0
 
-  let is_instance_of o1 o2 =
-    if o1.ctx == o2.ctx
-    then C.js_is_instance_of o1.ctx.ctx o1.jsval o2.jsval <> 0
-    else false
+    let js_function o = C.js_is_function o.ctx.ctx o.jsval <> 0
 
-  let to_string o : string option =
-    let rec aux (buf : Buffer.t) (char_ptr : char Ctypes.ptr) : string =
-      let ch = Ctypes.(!@char_ptr) in
-      if Char.equal ch '\000'
-      then Buffer.contents buf
+    let constructor o = C.js_is_constructor o.ctx.ctx o.jsval <> 0
+
+    let error o = C.js_is_error o.ctx.ctx o.jsval <> 0
+
+    let js_exception o = C.js_is_exception o.jsval <> 0
+
+    let big_int o = C.js_is_big_int o.ctx.ctx o.jsval <> 0
+
+    let big_float o = C.js_is_big_float o.jsval <> 0
+
+    let big_decimal o = C.js_is_big_decimal o.jsval <> 0
+
+    let instance_of o1 o2 =
+      if o1.ctx == o2.ctx
+      then C.js_is_instance_of o1.ctx.ctx o1.jsval o2.jsval <> 0
+      else false
+  end
+
+  module To = struct
+    let string_value o : value =
+      let new_o = C.js_to_string o.ctx.ctx o.jsval in
+      build_value o.ctx new_o
+
+    let string o : string option =
+      let rec aux (buf : Buffer.t) (char_ptr : char Ctypes.ptr) : string =
+        let ch = Ctypes.(!@char_ptr) in
+        if Char.equal ch '\000'
+        then Buffer.contents buf
+        else (
+          Buffer.add_char buf ch;
+          aux buf Ctypes.(char_ptr +@ 1)
+        )
+      in
+      let cstring = C.js_to_c_string o.ctx.ctx o.jsval in
+      if Ctypes.is_null cstring
+      then None
       else (
-        Buffer.add_char buf ch;
-        aux buf Ctypes.(char_ptr +@ 1)
+        let ostring = aux (Buffer.create 64) cstring in
+        let () = C.js_free_c_string o.ctx.ctx cstring in
+        Some ostring
       )
-    in
-    let cstring = C.js_to_c_string o.ctx.ctx o.jsval in
-    if Ctypes.is_null cstring
-    then None
-    else (
-      let ostring = aux (Buffer.create 64) cstring in
-      let () = C.js_free_c_string o.ctx.ctx cstring in
-      Some ostring
-    )
 
-  let to_bool o : bool or_js_exn =
-    let r = C.js_to_bool o.ctx.ctx o.jsval in
-    match r with
-      | -1 -> Error (get_exception o.ctx)
-      | 0 -> Ok false
-      | _ -> Ok true
+    let bool o : bool or_js_exn =
+      let r = C.js_to_bool o.ctx.ctx o.jsval in
+      match r with
+        | -1 -> Error (get_exception o.ctx)
+        | 0 -> Ok false
+        | _ -> Ok true
 
-  let to_xxx o ptr set_ptr =
-    let xxx = set_ptr o.ctx.ctx ptr o.jsval in
-    if xxx = 0 then Ok (Ctypes.( !@ ) ptr) else Error (get_exception o.ctx)
+    let to_xxx o ptr set_ptr =
+      let xxx = set_ptr o.ctx.ctx ptr o.jsval in
+      if xxx = 0 then Ok (Ctypes.( !@ ) ptr) else Error (get_exception o.ctx)
 
-  let to_int32 o =
-    let ptr = Ctypes.(allocate int32_t 0l) in
-    to_xxx o ptr C.js_to_int32
+    let int32 o =
+      let ptr = Ctypes.(allocate int32_t 0l) in
+      to_xxx o ptr C.js_to_int32
 
-  let to_int64 o =
-    let ptr = Ctypes.(allocate int64_t 0L) in
-    let f = if is_big_int o then C.js_to_bigint64 else C.js_to_int64 in
-    to_xxx o ptr f
+    let int64 o =
+      let ptr = Ctypes.(allocate int64_t 0L) in
+      let f = if Is.big_int o then C.js_to_bigint64 else C.js_to_int64 in
+      to_xxx o ptr f
 
-  let to_float o =
-    let ptr = Ctypes.(allocate double 0.0) in
-    to_xxx o ptr C.js_to_float64
+    let float o =
+      let ptr = Ctypes.(allocate double 0.0) in
+      to_xxx o ptr C.js_to_float64
 
-  let to_uint32 o =
-    let ptr = Ctypes.(allocate uint32_t Unsigned.UInt32.zero) in
-    to_xxx o ptr C.js_to_uint32
+    let uint32 o =
+      let ptr = Ctypes.(allocate uint32_t Unsigned.UInt32.zero) in
+      to_xxx o ptr C.js_to_uint32
+  end
 end
 
 (* --- *)

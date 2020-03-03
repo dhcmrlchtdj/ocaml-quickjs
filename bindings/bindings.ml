@@ -379,6 +379,41 @@ module Make (F : Cstubs.FOREIGN) = struct
   (* --- *)
 
   (*
+  JSValue JS_NewBool(JSContext *ctx, JS_BOOL val)
+  JSValue JS_NewString(JSContext *ctx, const char *str);
+  JSValue JS_NewInt32(JSContext *ctx, int32_t val)
+  JSValue JS_NewInt64(JSContext *ctx, int64_t v);
+  JSValue JS_NewFloat64(JSContext *ctx, double d)
+  JSValue JS_NewBigInt64(JSContext *ctx, int64_t v);
+  JSValue JS_NewBigUint64(JSContext *ctx, uint64_t v);
+  *)
+
+  let js_new_bool =
+    foreign "JS_NewBool" (ptr js_context @-> js_bool @-> returning js_value)
+
+  let js_new_string =
+    foreign "JS_NewString" (ptr js_context @-> string @-> returning js_value)
+
+  let js_new_int32 =
+    foreign "JS_NewInt32" (ptr js_context @-> int32_t @-> returning js_value)
+
+  let js_new_int64 =
+    foreign "JS_NewInt64" (ptr js_context @-> int64_t @-> returning js_value)
+
+  let js_new_float64 =
+    foreign "JS_NewFloat64" (ptr js_context @-> double @-> returning js_value)
+
+  let js_new_big_int64 =
+    foreign "JS_NewBigInt64" (ptr js_context @-> int64_t @-> returning js_value)
+
+  let js_new_big_uint64 =
+    foreign
+      "JS_NewBigUint64"
+      (ptr js_context @-> uint64_t @-> returning js_value)
+
+  (* --- *)
+
+  (*
   JS_BOOL JS_IsUninitialized(JSValueConst v)
   JS_BOOL JS_IsError(JSContext *ctx, JSValueConst val);
   JS_BOOL JS_IsException(JSValueConst v)
@@ -595,6 +630,18 @@ module Make (F : Cstubs.FOREIGN) = struct
       (ptr js_context @-> js_value @-> returning js_value)
 
   (* --- *)
+
+  let js_call =
+    (* JSValue JS_Call(JSContext *ctx, JSValueConst func_obj, JSValueConst this_obj, int argc, JSValueConst *argv); *)
+    foreign
+      "JS_Call"
+      (ptr js_context
+      @-> js_value_const
+      @-> js_value_const
+      @-> int
+      @-> ptr js_value_const
+      @-> returning js_value
+      )
 
   let js_c_function =
     (* typedef JSValue JSCFunction(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv); *)

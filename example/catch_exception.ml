@@ -9,4 +9,4 @@ let _ =
     | Ok _ -> assert false
     | Error e ->
       print_endline "exception catched";
-      print_endline (Quickjs.Value.to_string e |> Option.get)
+      print_endline (Quickjs.Value.To.string e |> Option.get)

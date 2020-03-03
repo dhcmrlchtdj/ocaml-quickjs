@@ -8,15 +8,15 @@ let _ =
     let ctx = Quickjs.new_runtime () |> Quickjs.new_context in
     let* d1 = Quickjs.eval ~ctx "new Date()" in
     let* d2 = Quickjs.eval ~ctx "Date" in
-    if is_instance_of d1 d2
+    if Is.instance_of d1 d2
     then print_endline "instanceof | pass"
     else print_endline "instanceof | fail";
     ok_unit
   in
   let _ =
     let* x = Quickjs.eval "1" in
-    let y = convert_to_string x in
-    if is_number x && is_string y
+    let y = To.string_value x in
+    if Is.number x && Is.string y
     then print_endline "convert_to_string | pass"
     else print_endline "convert_to_string | fail";
     ok_unit
@@ -24,20 +24,20 @@ let _ =
   let _ =
     let cases =
       [
-        (is_null, "null");
-        (is_undefined, "undefined");
-        (is_bool, "true");
-        (is_number, "1");
-        (is_string, {|"string"|});
-        (is_symbol, "Symbol()");
-        (is_array, "[]");
-        (is_object, "({obj:true})");
-        (is_function, "parseInt");
-        (is_constructor, "String");
-        (is_error, "new Error()");
-        (is_big_int, "1n");
-        (is_big_decimal, "1m");
-        (is_big_float, "1l");
+        (Is.null, "null");
+        (Is.undefined, "undefined");
+        (Is.bool, "true");
+        (Is.number, "1");
+        (Is.string, {|"string"|});
+        (Is.symbol, "Symbol()");
+        (Is.array, "[]");
+        (Is.js_object, "({obj:true})");
+        (Is.js_function, "parseInt");
+        (Is.constructor, "String");
+        (Is.error, "new Error()");
+        (Is.big_int, "1n");
+        (Is.big_decimal, "1m");
+        (Is.big_float, "1l");
       ]
     in
     let iter_f (f, s) =
