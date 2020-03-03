@@ -13,13 +13,23 @@ module JS_NAN_BOXING : S_BOXING_OR_NOT = struct
 end
 
 module NOT_JS_NAN_BOXING : S_BOXING_OR_NOT = struct
+  (** @see <https://github.com/libffi/libffi/issues/33> *)
+
   type js_value_union
 
+  (*
   let js_value_union : js_value_union union typ =
     let t = union "JSValueUnion" in
     let _ = field t "int32" int32_t in
     let _ = field t "float64" double in
     let _ = field t "ptr" (ptr void) in
+    let _ = seal t in
+    t
+  *)
+
+  let js_value_union : js_value_union structure typ =
+    let t = structure "JSValueUnion" in
+    let _ = field t "float64" double in
     let _ = seal t in
     t
 
@@ -586,7 +596,6 @@ module Make (F : Cstubs.FOREIGN) = struct
 
   (* --- *)
 
-  (*
   let js_c_function =
     (* typedef JSValue JSCFunction(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv); *)
     Foreign.funptr
@@ -607,7 +616,6 @@ module Make (F : Cstubs.FOREIGN) = struct
       @-> int
       @-> returning js_value
       )
-  *)
 
   (*
   type js_c_function_list_entry

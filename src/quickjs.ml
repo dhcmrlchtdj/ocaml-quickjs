@@ -45,6 +45,13 @@ let build_bytecode (ctx : context) (bc : C.js_value) : bytecode =
   Gc.finalise (fun { ctx; bc } -> C.js_free_value ctx.ctx bc) o;
   o
 
+let get_exception (ctx : context) : value =
+  let jsval = C.js_get_exception ctx.ctx in
+  build_value ctx jsval
+
+let check_exception o : value or_js_exn =
+  if C.js_is_exception o.jsval = 1 then Error (get_exception o.ctx) else Ok o
+
 (* --- *)
 
 let new_runtime () : runtime =
@@ -91,14 +98,35 @@ let enable_bignum_ext (ctx : context) = C.js_enable_bignum_ext ctx.ctx 1
 
 let disable_bignum_ext (ctx : context) = C.js_enable_bignum_ext ctx.ctx 0
 
+type js_func = context -> value -> value list -> value
+
+let add_func (ctx : context) (func : js_func) (name : string) (argc : int)
+    : value or_js_exn
+  =
+  let cfunc
+      (_ : C.js_context Ctypes.ptr)
+      (this : C.js_value)
+      (len : int)
+      (value_ptr : C.js_value Ctypes.ptr)
+    =
+    let rec build_args args len arg_ptr =
+      if len = 0
+      then List.rev args
+      else (
+        let v = build_value ctx Ctypes.(!@arg_ptr) in
+        let next_ptr = Ctypes.(arg_ptr +@ 1) in
+        build_args (v :: args) (len - 1) next_ptr
+      )
+    in
+    let args = build_args [] len value_ptr in
+    let this_val = build_value ctx this in
+    let r = func ctx this_val args in
+    r.jsval
+  in
+  let r = C.js_new_c_function ctx.ctx cfunc name argc in
+  check_exception (build_value ctx r)
+
 (* --- *)
-
-let get_exception (ctx : context) : value =
-  let jsval = C.js_get_exception ctx.ctx in
-  build_value ctx jsval
-
-let check_exception o : value or_js_exn =
-  if C.js_is_exception o.jsval = 1 then Error (get_exception o.ctx) else Ok o
 
 module Value = struct
   let convert_to_string o : value =

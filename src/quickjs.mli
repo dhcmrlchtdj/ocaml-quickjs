@@ -76,6 +76,13 @@ val enable_bignum_ext : context -> unit
 
 val disable_bignum_ext : context -> unit
 
+type js_func = context -> value -> value list -> value
+(** [context -> this -> arguments] *)
+
+val add_func : context -> js_func -> string -> int -> value or_js_exn
+(** [add_func ctx func name argc] export [func] to [context]
+    *)
+
 (** {1 value} *)
 
 (** convert [value] to ocaml data *)
@@ -127,7 +134,7 @@ module Value : sig
   val to_float : value -> float or_js_exn
 
   val to_string : value -> string option
-  (** return None if exception *)
+  (** return [None] if value return a null string *)
 end
 
 val check_exception : value -> value or_js_exn
