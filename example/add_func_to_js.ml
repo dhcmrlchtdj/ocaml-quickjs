@@ -3,33 +3,24 @@ let ( let* ) = Stdlib.Result.bind
 let ok_unit = Ok ()
 
 let _ =
-  let open Quickjs.Value in
-  let fib ctx _this args =
-    let rec fib n =
-      if n <= 0l
-      then 0l
-      else if n = 1l
-      then 1l
-      else Int32.(add (fib (sub n 1l)) (fib (sub n 2l)))
-    in
-    args
-    |> List.hd
-    |> To.int32
-    |> Result.get_ok
-    |> fib
-    |> New.int32 ctx
-    |> New.jsval ctx
+  let fib ctx _this argc _argv =
+    print_endline "==========";
+    Printf.printf "%d\n" argc;
+    Quickjs_raw.js_new_int32 ctx 0l
   in
-  let ctx = Quickjs.new_runtime () |> Quickjs.new_context in
-  let* f = Quickjs.add_func ctx fib "fib" 1 in
-  print_endline (if Is.js_function f then "f is a function" else "");
-  print_endline (To.string f |> Option.get);
-  let r = Quickjs.eval ~ctx "fib(20)" in
-  match r with
-    | Ok r ->
-      let* r = To.int32 r in
-      print_endline (Int32.to_string r);
-      ok_unit
-    | Error e ->
-      print_endline (To.string e |> Option.get);
-      ok_unit
+  let rt = Quickjs_raw.js_new_runtime () in
+  let ctx = Quickjs_raw.js_new_context rt in
+  let global = Quickjs_raw.js_get_global_object ctx in
+  let entry = Quickjs_raw.JS_C_function.js_cfunc_def "fibx" 1 fib in
+  let entries =
+    Ctypes.allocate_n Quickjs_raw.JS_C_function.list_entry ~count:1
+  in
+  let () = Ctypes.(entries <-@ entry) in
+  Quickjs_raw.js_set_property_function_list ctx global entries 1;
+  let jsval =
+    Quickjs_raw.js_eval ctx "fibx" (Unsigned.Size_t.of_int 6) "input.js" 0
+  in
+  let cstring = Quickjs_raw.js_to_c_string ctx jsval in
+  let ch = Ctypes.(!@cstring) in
+  print_char ch;
+  ok_unit

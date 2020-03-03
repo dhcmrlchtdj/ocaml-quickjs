@@ -46,7 +46,7 @@ module NOT_JS_NAN_BOXING : S_BOXING_OR_NOT = struct
 end
 
 let boxing_or_not : (module S_BOXING_OR_NOT) =
-  if Constants.define_JS_NAN_BOXING
+  if Constants.const_JS_NAN_BOXING
   then
     ( module struct
       include JS_NAN_BOXING
@@ -284,6 +284,10 @@ module Make (F : Cstubs.FOREIGN) = struct
   let js_enable_bignum_ext =
     (* void JS_EnableBignumExt(JSContext *ctx, JS_BOOL enable); *)
     foreign "JS_EnableBignumExt" (ptr js_context @-> js_bool @-> returning void)
+
+  let js_get_global_object =
+    (* JSValue JS_GetGlobalObject(JSContext *ctx); *)
+    foreign "JS_GetGlobalObject" (ptr js_context @-> returning js_value)
 
   (* --- *)
 
@@ -643,32 +647,97 @@ module Make (F : Cstubs.FOREIGN) = struct
       @-> returning js_value
       )
 
-  let js_c_function =
-    (* typedef JSValue JSCFunction(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv); *)
-    Foreign.funptr
-      Ctypes.(
-        ptr js_context
-        @-> js_value_const
-        @-> int
-        @-> ptr js_value_const
-        @-> returning js_value)
+  module JS_C_function = struct
+    let js_c_function =
+      (* typedef JSValue JSCFunction(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv); *)
+      Foreign.funptr
+        Ctypes.(
+          ptr js_context
+          @-> js_value_const
+          @-> int
+          @-> ptr js_value_const
+          @-> returning js_value)
+
+    (* --- *)
+
+    type js_c_function_type
+
+    let js_c_function_type : js_c_function_type structure typ =
+      structure "JSCFunctionType"
+
+    let js_c_function_type_generic =
+      field js_c_function_type "generic" js_c_function
+
+    let _ = seal js_c_function_type
+
+    type js_c_function_type_ptr = js_c_function_type ptr
+
+    (* --- *)
+
+    type u
+
+    let u : u structure typ = structure "u"
+
+    let u_length = field u "length" uint8_t
+
+    let u_cproto = field u "cproto" uint8_t
+
+    let u_cfunc = field u "cfunc" js_c_function_type
+
+    let _ = seal u
+
+    type u_ptr = u ptr
+
+    (* --- *)
+
+    type list_entry
+
+    let list_entry : list_entry structure typ = structure "JSCFunctionListEntry"
+
+    let list_entry_name = field list_entry "name" string
+
+    let list_entry_prop_flags = field list_entry "prop_flags" uint8_t
+
+    let list_entry_def_type = field list_entry "def_type" uint8_t
+
+    let list_entry_magic = field list_entry "magic" uint16_t
+
+    let list_entry_u = field list_entry "u" u
+
+    let _ = seal list_entry
+
+    type list_entry_ptr = list_entry ptr
+
+    let js_cfunc_def (fn_name : string) (fn_argc : int) fn =
+      let u8_of_int = Unsigned.UInt8.of_int in
+      let cfunc = make js_c_function_type in
+      setf cfunc js_c_function_type_generic fn;
+      let u = make u in
+      setf u u_length (u8_of_int fn_argc);
+      setf u u_cproto (u8_of_int const_JS_CFUNC_generic);
+      setf u u_cfunc cfunc;
+      let entry = make list_entry in
+      setf entry list_entry_name fn_name;
+      setf
+        entry
+        list_entry_prop_flags
+        (u8_of_int (const_JS_PROP_WRITABLE lor const_JS_PROP_CONFIGURABLE));
+      setf entry list_entry_def_type (u8_of_int const_JS_DEF_CFUNC);
+      setf entry list_entry_magic Unsigned.UInt16.zero;
+      setf entry list_entry_u u;
+      entry
+  end
 
   let js_new_c_function =
     (* JSValue JS_NewCFunction(JSContext *ctx, JSCFunction *func, const char *name, int length) *)
     foreign
       "JS_NewCFunction"
       (ptr js_context
-      @-> js_c_function
+      @-> JS_C_function.js_c_function
       @-> string
       @-> int
       @-> returning js_value
       )
-
-  (*
-  type js_c_function_list_entry
-
-  let js_c_function_list_entry : js_c_function_list_entry structure typ =
-    structure "JSCFunctionListEntry"
 
   let js_set_property_function_list =
     (* void JS_SetPropertyFunctionList(JSContext *ctx, JSValueConst obj, const JSCFunctionListEntry *tab, int len); *)
@@ -676,11 +745,10 @@ module Make (F : Cstubs.FOREIGN) = struct
       "JS_SetPropertyFunctionList"
       (ptr js_context
       @-> js_value_const
-      @-> ptr js_c_function_list_entry
+      @-> ptr JS_C_function.list_entry
       @-> int
       @-> returning void
       )
-  *)
 
   (* --- *)
 

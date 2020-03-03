@@ -76,34 +76,40 @@ val enable_bignum_ext : context -> unit
 
 val disable_bignum_ext : context -> unit
 
-type js_func = context -> value -> value list -> value
-(** [context -> this -> arguments] *)
+val get_global_object : context -> value
 
-val add_func : context -> js_func -> string -> int -> value or_js_exn
+type js_func =
+  Quickjs_raw.js_context_ptr ->
+  Quickjs_raw.js_value ->
+  Quickjs_raw.js_value list ->
+  Quickjs_raw.js_value
+(** [context -> this -> arguments -> returning] *)
+
+val new_func : context -> js_func -> string -> int -> value or_js_exn
 (** [add_func context func name argc] export [func] to [context]
     return the js function created
     *)
+
+val add_func_to_object : value -> js_func -> string -> int -> unit
 
 (** {1 value} *)
 
 (** convert [value] to ocaml data *)
 module Value : sig
   module New : sig
-    val jsval : context -> Quickjs_raw.js_value -> value
+    val bool : context -> bool -> value
 
-    val bool : context -> bool -> Quickjs_raw.js_value
+    val string : context -> string -> value
 
-    val string : context -> string -> Quickjs_raw.js_value
+    val int32 : context -> Int32.t -> value
 
-    val int32 : context -> Int32.t -> Quickjs_raw.js_value
+    val int64 : context -> Int64.t -> value
 
-    val int64 : context -> Int64.t -> Quickjs_raw.js_value
+    val float : context -> float -> value
 
-    val float : context -> float -> Quickjs_raw.js_value
+    val big_int64 : context -> Int64.t -> value
 
-    val big_int64 : context -> Int64.t -> Quickjs_raw.js_value
-
-    val big_uint64 : context -> Unsigned.uint64 -> Quickjs_raw.js_value
+    val big_uint64 : context -> Unsigned.uint64 -> value
   end
 
   module Is : sig

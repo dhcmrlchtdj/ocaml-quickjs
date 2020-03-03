@@ -90,7 +90,7 @@ let new_context (rt : runtime) : context =
   let () = Gc.finalise (fun (obj : context) -> C.js_free_context obj.ctx) ctx in
   ctx
 
-let get_runtime ctx = ctx.rt
+let get_runtime (ctx : context) = ctx.rt
 
 let set_max_stack_size (ctx : context) = C.js_set_max_stack_size ctx.ctx
 
@@ -98,54 +98,35 @@ let enable_bignum_ext (ctx : context) = C.js_enable_bignum_ext ctx.ctx 1
 
 let disable_bignum_ext (ctx : context) = C.js_enable_bignum_ext ctx.ctx 0
 
-type js_func = context -> value -> value list -> value
-
-let add_func (ctx : context) (func : js_func) (name : string) (argc : int)
-    : value or_js_exn
-  =
-  let cfunc
-      (_ : C.js_context Ctypes.ptr)
-      (this : C.js_value)
-      (len : int)
-      (value_ptr : C.js_value Ctypes.ptr)
-    =
-    let rec build_args args len arg_ptr =
-      if len = 0
-      then List.rev args
-      else (
-        let v = build_value ctx Ctypes.(!@arg_ptr) in
-        let next_ptr = Ctypes.(arg_ptr +@ 1) in
-        build_args (v :: args) (len - 1) next_ptr
-      )
-    in
-    let args = build_args [] len value_ptr in
-    let this_val = build_value ctx this in
-    let r = func ctx this_val args in
-    r.jsval
-  in
-  let r = C.js_new_c_function ctx.ctx cfunc name argc in
-  check_exception (build_value ctx r)
+let get_global_object (ctx : context) =
+  let jsval = C.js_get_global_object ctx.ctx in
+  (* do not free global *)
+  { ctx; jsval }
 
 (* --- *)
 
 module Value = struct
   module New = struct
-    let jsval = build_value
+    let bool (ctx : context) b : value =
+      C.js_new_bool ctx.ctx (if b then 1 else 0) |> build_value ctx
 
-    let bool (ctx : context) b = C.js_new_bool ctx.ctx (if b then 0 else 1)
+    let string (ctx : context) s : value =
+      C.js_new_string ctx.ctx s |> build_value ctx
 
-    let string (ctx : context) s = C.js_new_string ctx.ctx s
+    let int32 (ctx : context) (n : Int32.t) : value =
+      C.js_new_int32 ctx.ctx n |> build_value ctx
 
-    let int32 (ctx : context) (n : Int32.t) = C.js_new_int32 ctx.ctx n
+    let int64 (ctx : context) (n : Int64.t) : value =
+      C.js_new_int64 ctx.ctx n |> build_value ctx
 
-    let int64 (ctx : context) (n : Int64.t) = C.js_new_int64 ctx.ctx n
+    let float (ctx : context) (n : float) : value =
+      C.js_new_float64 ctx.ctx n |> build_value ctx
 
-    let float (ctx : context) (n : float) = C.js_new_float64 ctx.ctx n
+    let big_int64 (ctx : context) (n : Int64.t) : value =
+      C.js_new_big_int64 ctx.ctx n |> build_value ctx
 
-    let big_int64 (ctx : context) (n : Int64.t) = C.js_new_big_int64 ctx.ctx n
-
-    let big_uint64 (ctx : context) (n : Unsigned.uint64) =
-      C.js_new_big_uint64 ctx.ctx n
+    let big_uint64 (ctx : context) (n : Unsigned.uint64) : value =
+      C.js_new_big_uint64 ctx.ctx n |> build_value ctx
   end
 
   module Is = struct
@@ -243,13 +224,80 @@ end
 
 (* --- *)
 
+type js_func = C.js_context_ptr -> C.js_value -> C.js_value list -> C.js_value
+
+let build_cfunc (fn : js_func) =
+  let cfunc
+      (jsctx : C.js_context_ptr)
+      (this : C.js_value)
+      (argc : int)
+      (value_ptr : C.js_value Ctypes.ptr)
+    =
+    print_endline "==========";
+    Printf.printf "%d\n" argc;
+    let rec build_args args len arg_ptr =
+      if len = 0
+      then List.rev args
+      else (
+        let arg = Ctypes.(!@arg_ptr) in
+        let next_ptr = Ctypes.(arg_ptr +@ 1) in
+        build_args (arg :: args) (len - 1) next_ptr
+      )
+    in
+    let args = build_args [] argc value_ptr in
+    fn jsctx this args
+  in
+  cfunc
+
+let new_func (ctx : context) (fn : js_func) (fn_name : string) (fn_argc : int)
+    : value or_js_exn
+  =
+  let cfunc = build_cfunc fn in
+  let r = C.js_new_c_function ctx.ctx cfunc fn_name fn_argc in
+  check_exception (build_value ctx r)
+
+let add_func_to_object
+    (obj : value)
+    (fn : js_func)
+    (fn_name : string)
+    (fn_argc : int)
+  =
+  let func_entry_ptr =
+    let module JSC = C.JS_C_function in
+    let setf = Ctypes.setf in
+    let u8_of_int = Unsigned.UInt8.of_int in
+    let cfunc = Ctypes.make JSC.js_c_function_type in
+    setf cfunc JSC.js_c_function_type_generic (build_cfunc fn);
+    let u = Ctypes.make JSC.u in
+    setf u JSC.u_length (u8_of_int fn_argc);
+    setf u JSC.u_cproto (u8_of_int C.const_JS_CFUNC_generic);
+    setf u JSC.u_cfunc cfunc;
+    let entry = Ctypes.make JSC.list_entry in
+    setf entry JSC.list_entry_name fn_name;
+    setf
+      entry
+      JSC.list_entry_prop_flags
+      (u8_of_int (C.const_JS_PROP_WRITABLE lor C.const_JS_PROP_CONFIGURABLE));
+    setf entry JSC.list_entry_def_type (u8_of_int C.const_JS_DEF_CFUNC);
+    setf entry JSC.list_entry_magic Unsigned.UInt16.zero;
+    setf entry JSC.list_entry_u u;
+    Ctypes.allocate JSC.list_entry entry
+
+(* #define JS_CFUNC_DEF(name, length, func1)
+ * { name, JS_PROP_WRITABLE | JS_PROP_CONFIGURABLE, JS_DEF_CFUNC, 0,
+ * .u = { .func = { length, JS_CFUNC_generic, { .generic = func1 } } } } *)
+  in
+  C.js_set_property_function_list obj.ctx.ctx obj.jsval func_entry_ptr 1
+
+(* --- *)
+
 let get_flag = function
-  | `GLOBAL -> C.define_JS_EVAL_TYPE_GLOBAL
-  | `MODULE -> C.define_JS_EVAL_TYPE_MODULE
-  | `STRICT -> C.define_JS_EVAL_FLAG_STRICT
-  | `STRIP -> C.define_JS_EVAL_FLAG_STRIP
-  | `BACKTRACE_BARRIER -> C.define_JS_EVAL_FLAG_BACKTRACE_BARRIER
-  | `COMPILE_ONLY -> C.define_JS_EVAL_FLAG_COMPILE_ONLY
+  | `GLOBAL -> C.const_JS_EVAL_TYPE_GLOBAL
+  | `MODULE -> C.const_JS_EVAL_TYPE_MODULE
+  | `STRICT -> C.const_JS_EVAL_FLAG_STRICT
+  | `STRIP -> C.const_JS_EVAL_FLAG_STRIP
+  | `BACKTRACE_BARRIER -> C.const_JS_EVAL_FLAG_BACKTRACE_BARRIER
+  | `COMPILE_ONLY -> C.const_JS_EVAL_FLAG_COMPILE_ONLY
 
 type eval_type =
   [ `GLOBAL
