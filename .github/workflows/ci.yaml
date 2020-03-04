@@ -5,6 +5,7 @@ on: [push, pull_request]
 jobs:
     ci:
         strategy:
+            fail-fast: false
             matrix:
                 operating-system: [macos-latest, ubuntu-latest]
                 ocaml-version: [ '4.09.0+flambda', '4.10.0+flambda' ]
