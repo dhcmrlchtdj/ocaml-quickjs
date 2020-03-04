@@ -662,8 +662,7 @@ module Make (F : Cstubs.FOREIGN) = struct
 
     type js_c_function_type
 
-    let js_c_function_type : js_c_function_type structure typ =
-      structure "JSCFunctionType"
+    let js_c_function_type : js_c_function_type structure typ = structure ""
 
     let js_c_function_type_generic =
       field js_c_function_type "generic" js_c_function
@@ -676,7 +675,7 @@ module Make (F : Cstubs.FOREIGN) = struct
 
     type u
 
-    let u : u structure typ = structure "u"
+    let u : u structure typ = structure ""
 
     let u_length = field u "length" uint8_t
 

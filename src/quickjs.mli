@@ -78,19 +78,10 @@ val disable_bignum_ext : context -> unit
 
 val get_global_object : context -> value
 
-type js_func =
-  Quickjs_raw.js_context_ptr ->
-  Quickjs_raw.js_value ->
-  Quickjs_raw.js_value list ->
-  Quickjs_raw.js_value
+type js_func = context -> value -> value list -> value
 (** [context -> this -> arguments -> returning] *)
 
-val new_func : context -> js_func -> string -> int -> value or_js_exn
-(** [add_func context func name argc] export [func] to [context]
-    return the js function created
-    *)
-
-val add_func_to_object : value -> js_func -> string -> int -> unit
+val add_func_to_object : value -> string -> int -> js_func -> unit
 
 (** {1 value} *)
 

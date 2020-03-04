@@ -224,43 +224,37 @@ end
 
 (* --- *)
 
-type js_func = C.js_context_ptr -> C.js_value -> C.js_value list -> C.js_value
+type js_func = context -> value -> value list -> value
 
-let build_cfunc (fn : js_func) =
+let build_cfunc (_fn : js_func) =
   let cfunc
-      (jsctx : C.js_context_ptr)
-      (this : C.js_value)
-      (argc : int)
-      (value_ptr : C.js_value Ctypes.ptr)
+      (_jsctx : C.js_context_ptr)
+      (_this : C.js_value)
+      (_argc : int)
+      (_value_ptr : C.js_value Ctypes.ptr)
+      : C.js_value
     =
-    print_endline "==========";
-    Printf.printf "%d\n" argc;
-    let rec build_args args len arg_ptr =
-      if len = 0
-      then List.rev args
-      else (
-        let arg = Ctypes.(!@arg_ptr) in
-        let next_ptr = Ctypes.(arg_ptr +@ 1) in
-        build_args (arg :: args) (len - 1) next_ptr
-      )
-    in
-    let args = build_args [] argc value_ptr in
-    fn jsctx this args
+    assert false
+    (* let rec build_args args len arg_ptr = *)
+    (*   if len = 0 *)
+    (*   then List.rev args *)
+    (*   else ( *)
+    (*     let arg = Ctypes.(!@arg_ptr) in *)
+    (*     let next_ptr = Ctypes.(arg_ptr +@ 1) in *)
+    (*     build_args (arg :: args) (len - 1) next_ptr *)
+    (*   ) *)
+    (* in *)
+    (* let _args = build_args [] argc value_ptr in *)
+    (* () *)
+    (* let v = fn jsctx this args in *)
   in
   cfunc
 
-let new_func (ctx : context) (fn : js_func) (fn_name : string) (fn_argc : int)
-    : value or_js_exn
-  =
-  let cfunc = build_cfunc fn in
-  let r = C.js_new_c_function ctx.ctx cfunc fn_name fn_argc in
-  check_exception (build_value ctx r)
-
 let add_func_to_object
     (obj : value)
-    (fn : js_func)
     (fn_name : string)
     (fn_argc : int)
+    (fn : js_func)
   =
   let func_entry_ptr =
     let module JSC = C.JS_C_function in
@@ -282,11 +276,11 @@ let add_func_to_object
     setf entry JSC.list_entry_magic Unsigned.UInt16.zero;
     setf entry JSC.list_entry_u u;
     Ctypes.allocate JSC.list_entry entry
-
-(* #define JS_CFUNC_DEF(name, length, func1)
- * { name, JS_PROP_WRITABLE | JS_PROP_CONFIGURABLE, JS_DEF_CFUNC, 0,
- * .u = { .func = { length, JS_CFUNC_generic, { .generic = func1 } } } } *)
+    (* #define JS_CFUNC_DEF(name, length, func1)
+     * { name, JS_PROP_WRITABLE | JS_PROP_CONFIGURABLE, JS_DEF_CFUNC, 0,
+     * .u = { .func = { length, JS_CFUNC_generic, { .generic = func1 } } } } *)
   in
+
   C.js_set_property_function_list obj.ctx.ctx obj.jsval func_entry_ptr 1
 
 (* --- *)
