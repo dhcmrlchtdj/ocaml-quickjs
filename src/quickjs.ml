@@ -138,6 +138,8 @@ module Value = struct
 
     let int32 (ctx : context) (n : Int32.t) = C.js_new_int32 ctx.ctx n
 
+    let uint32 (ctx : context) (n : Unsigned.uint32) = C.js_new_uint32 ctx.ctx n
+
     let int64 (ctx : context) (n : Int64.t) = C.js_new_int64 ctx.ctx n
 
     let float (ctx : context) (n : float) = C.js_new_float64 ctx.ctx n
@@ -228,8 +230,7 @@ module Value = struct
 
     let int64 o =
       let ptr = Ctypes.(allocate int64_t 0L) in
-      let f = if Is.big_int o then C.js_to_bigint64 else C.js_to_int64 in
-      to_xxx o ptr f
+      to_xxx o ptr C.js_to_int64ext
 
     let float o =
       let ptr = Ctypes.(allocate double 0.0) in

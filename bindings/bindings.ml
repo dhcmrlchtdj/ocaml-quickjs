@@ -382,6 +382,7 @@ module Make (F : Cstubs.FOREIGN) = struct
   JSValue JS_NewBool(JSContext *ctx, JS_BOOL val)
   JSValue JS_NewString(JSContext *ctx, const char *str);
   JSValue JS_NewInt32(JSContext *ctx, int32_t val)
+  JSValue JS_NewUint32(JSContext *ctx, uint32_t val)
   JSValue JS_NewInt64(JSContext *ctx, int64_t v);
   JSValue JS_NewFloat64(JSContext *ctx, double d)
   JSValue JS_NewBigInt64(JSContext *ctx, int64_t v);
@@ -396,6 +397,9 @@ module Make (F : Cstubs.FOREIGN) = struct
 
   let js_new_int32 =
     foreign "JS_NewInt32" (ptr js_context @-> int32_t @-> returning js_value)
+
+  let js_new_uint32 =
+    foreign "JS_NewUint32" (ptr js_context @-> uint32_t @-> returning js_value)
 
   let js_new_int64 =
     foreign "JS_NewInt64" (ptr js_context @-> int64_t @-> returning js_value)
@@ -501,6 +505,7 @@ module Make (F : Cstubs.FOREIGN) = struct
   int JS_ToInt32(JSContext *ctx, int32_t *pres, JSValueConst val);
   int JS_ToUint32(JSContext *ctx, uint32_t *pres, JSValueConst val)
   int JS_ToInt64(JSContext *ctx, int64_t *pres, JSValueConst val);
+  int JS_ToInt64Ext(JSContext *ctx, int64_t *pres, JSValueConst val);
   int JS_ToBigInt64(JSContext *ctx, int64_t *pres, JSValueConst val);
   int JS_ToFloat64(JSContext *ctx, double *pres, JSValueConst val);
 
@@ -526,6 +531,11 @@ module Make (F : Cstubs.FOREIGN) = struct
   let js_to_int64 =
     foreign
       "JS_ToInt64"
+      (ptr js_context @-> ptr int64_t @-> js_value_const @-> returning int)
+
+  let js_to_int64ext =
+    foreign
+      "JS_ToInt64Ext"
       (ptr js_context @-> ptr int64_t @-> js_value_const @-> returning int)
 
   let js_to_float64 =

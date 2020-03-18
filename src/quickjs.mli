@@ -97,6 +97,8 @@ module Value : sig
 
     val int32 : context -> Int32.t -> Quickjs_raw.js_value
 
+    val uint32 : context -> Unsigned.uint32 -> Quickjs_raw.js_value
+
     val int64 : context -> Int64.t -> Quickjs_raw.js_value
 
     val float : context -> float -> Quickjs_raw.js_value
