@@ -8,14 +8,14 @@ license: "MIT"
 homepage: "https://github.com/dhcmrlchtdj/ocaml-quickjs"
 bug-reports: "https://github.com/dhcmrlchtdj/ocaml-quickjs/issues"
 depends: [
-  "ocaml" {>= "4.09.0"}
-  "ctypes" {>= "0.16.0"}
+  "ocaml" {>= "4.10.0"}
+  "ctypes" {>= "0.17.1"}
   "ctypes-foreign" {>= "0.4.0"}
   "integers" {>= "0.3.0"}
   "ppx_deriving" {build & >= "4.4.1"}
-  "dune" {build & >= "2.3.0"}
-  "dune-configurator" {build & >= "2.3.0"}
-  "bisect_ppx" {build & >= "1.4.2"}
+  "dune" {build & >= "2.4.0"}
+  "dune-configurator" {build & >= "2.4.0"}
+  "bisect_ppx" {build & >= "2.0.0"}
   "odoc" {with-doc & >= "1.5.0"}
   "ocamlformat" {dev & >= "0.13.0"}
 ]
