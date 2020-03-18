@@ -4,7 +4,7 @@
  (modules constants bindings)
  (libraries ctypes ctypes.stubs ctypes.foreign)
  (preprocess
-  (pps ppx_deriving.show)))
+  (pps ppx_deriving.show bisect_ppx --conditional)))
 
 (rule
  (targets constants.ml)

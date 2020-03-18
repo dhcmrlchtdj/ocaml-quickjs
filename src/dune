@@ -11,6 +11,8 @@
  (name quickjs_raw)
  (modules quickjs_raw stubs)
  (libraries bindings)
+ (preprocess
+  (pps bisect_ppx --conditional))
  (foreign_archives ../vendor/quickjs)
  (foreign_stubs
   (language c)
