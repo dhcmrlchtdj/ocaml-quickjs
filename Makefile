@@ -15,7 +15,9 @@ test_update:
 coverage:
 	opam exec dune -- clean
 	OCAMLRUNPARAM=b BISECT_ENABLE=yes opam exec dune -- runtest
+	opam exec bisect-ppx-report -- coveralls _coverage/coverage.json
 	opam exec bisect-ppx-report -- html
+	opam exec bisect-ppx-report -- summary
 
 clean:
 	opam exec dune -- clean
