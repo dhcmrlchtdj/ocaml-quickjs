@@ -17,8 +17,7 @@ jobs:
               with:
                   path: ~/.opam/download-cache/
                   key: ${{ runner.os }}-ocaml-opam-${{ hashFiles('dune-project') }}
-                  restore-keys: |
-                      ${{ runner.os }}-ocaml-opam-
+                  restore-keys: ${{ runner.os }}-ocaml-opam-
             - run: make dep
             - run: make doc
             - uses: peaceiris/actions-gh-pages@v3.0.3
