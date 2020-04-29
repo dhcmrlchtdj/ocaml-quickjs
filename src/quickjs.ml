@@ -59,6 +59,9 @@ let new_runtime () : runtime =
   let () = Gc.finalise (fun (obj : runtime) -> C.js_free_runtime obj.rt) rt in
   rt
 
+
+let set_max_stack_size (rt : runtime) = C.js_set_max_stack_size rt.rt
+
 let set_memory_limit (rt : runtime) = C.js_set_memory_limit rt.rt
 
 let set_gc_threshold (rt : runtime) = C.js_set_gc_threshold rt.rt
@@ -91,8 +94,6 @@ let new_context (rt : runtime) : context =
   ctx
 
 let get_runtime ctx = ctx.rt
-
-let set_max_stack_size (ctx : context) = C.js_set_max_stack_size ctx.ctx
 
 let enable_bignum_ext (ctx : context) = C.js_enable_bignum_ext ctx.ctx 1
 

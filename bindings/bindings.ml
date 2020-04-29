@@ -111,6 +111,10 @@ module Make (F : Cstubs.FOREIGN) = struct
     (* void JS_FreeRuntime(JSRuntime *rt) *)
     foreign "JS_FreeRuntime" (ptr js_runtime @-> returning void)
 
+  let js_set_max_stack_size =
+    (* void JS_SetMaxStackSize(JSRuntime *rt, size_t stack_size) *)
+    foreign "JS_SetMaxStackSize" (ptr js_runtime @-> size_t @-> returning void)
+
   let js_set_runtime_info =
     (* void JS_SetRuntimeInfo(JSRuntime *rt, const char *info); *)
     foreign "JS_SetRuntimeInfo" (ptr js_runtime @-> string @-> returning void)
@@ -276,10 +280,6 @@ module Make (F : Cstubs.FOREIGN) = struct
   let js_get_runtime =
     (* JSRuntime *JS_GetRuntime(JSContext *ctx); *)
     foreign "JS_GetRuntime" (ptr js_context @-> returning (ptr js_runtime))
-
-  let js_set_max_stack_size =
-    (* void JS_SetMaxStackSize(JSContext *ctx, size_t stack_size); *)
-    foreign "JS_SetMaxStackSize" (ptr js_context @-> size_t @-> returning void)
 
   let js_enable_bignum_ext =
     (* void JS_EnableBignumExt(JSContext *ctx, JS_BOOL enable); *)

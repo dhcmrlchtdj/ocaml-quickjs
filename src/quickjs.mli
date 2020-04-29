@@ -46,6 +46,8 @@ val get_raw_bytecode : bytecode -> Quickjs_raw.js_value
 
 val new_runtime : unit -> runtime
 
+val set_max_stack_size : runtime -> Unsigned.size_t -> unit
+
 val set_memory_limit : runtime -> Unsigned.size_t -> unit
 
 val set_gc_threshold : runtime -> Unsigned.size_t -> unit
@@ -66,8 +68,6 @@ val set_interrupt_handler : runtime -> interrupt_handler -> unit
 val new_context : runtime -> context
 
 val get_runtime : context -> runtime
-
-val set_max_stack_size : context -> Unsigned.size_t -> unit
 
 val enable_bignum_ext : context -> unit
 (** enable math mode support.
