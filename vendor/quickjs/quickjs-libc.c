@@ -47,6 +47,8 @@
 #include <sys/wait.h>
 #if defined(__APPLE__)
 typedef sig_t sighandler_t;
+#include <crt_externs.h>
+#define environ (*_NSGetEnviron ())
 #endif
 #endif
 
