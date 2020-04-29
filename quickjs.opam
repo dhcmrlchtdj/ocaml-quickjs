@@ -13,11 +13,11 @@ depends: [
   "ctypes-foreign" {>= "0.4.0"}
   "integers" {>= "0.3.0"}
   "ppx_deriving" {build & >= "4.4.1"}
-  "dune" {build & >= "2.4.0"}
-  "dune-configurator" {build & >= "2.4.0"}
-  "bisect_ppx" {build & >= "2.0.0"}
+  "dune" {build & >= "2.5.1"}
+  "dune-configurator" {build & >= "2.5.1"}
+  "bisect_ppx" {build & >= "2.4.0"}
   "odoc" {with-doc & >= "1.5.0"}
-  "ocamlformat" {dev & >= "0.13.0"}
+  "ocamlformat" {dev & >= "0.14.1"}
 ]
 build: [
   ["dune" "subst"] {pinned}
