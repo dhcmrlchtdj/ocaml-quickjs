@@ -59,7 +59,6 @@ let new_runtime () : runtime =
   let () = Gc.finalise (fun (obj : runtime) -> C.js_free_runtime obj.rt) rt in
   rt
 
-
 let set_max_stack_size (rt : runtime) = C.js_set_max_stack_size rt.rt
 
 let set_memory_limit (rt : runtime) = C.js_set_memory_limit rt.rt
