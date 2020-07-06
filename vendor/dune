@@ -3,6 +3,6 @@
 (foreign_library
  (archive_name quickjs)
  (language c)
- (flags -D_GNU_SOURCE "-DCONFIG_VERSION=\\\"2020-04-12\\\"" -DCONFIG_BIGNUM
+ (flags -D_GNU_SOURCE "-DCONFIG_VERSION=\\\"2020-07-05\\\"" -DCONFIG_BIGNUM
    :standard)
  (names quickjs libregexp libunicode cutils quickjs-libc libbf))
