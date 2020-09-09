@@ -1,4 +1,4 @@
-(lang dune 2.6)
+(lang dune 2.7)
 
 (allow_approximate_merlin)
 
@@ -20,11 +20,11 @@
   (ctypes-foreign       (and (>= 0.4.0)))
   (integers             (and (>= 0.4.0)))
   (ppx_deriving         (and :build (>= 4.5)))
-  (dune                 (and :build (>= 2.6.1)))
-  (dune-configurator    (and :build (>= 2.6.1)))
+  (dune                 (and :build (>= 2.7.1)))
+  (dune-configurator    (and :build (>= 2.7.1)))
   (bisect_ppx           (and :build (>= 2.4.1)))
   (odoc                 (and :with-doc (>= 1.5.1)))
-  (ocamlformat          (and :dev (>= 0.14.2)))
+  (ocamlformat          (and :dev (>= 0.15.0)))
   ))
 
 (generate_opam_files true)
