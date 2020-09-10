@@ -7,22 +7,27 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                operating-system: [macos-latest, ubuntu-latest]
-                ocaml-version: ['4.10.0+flambda']
-        runs-on: ${{ matrix.operating-system }}
+                os:
+                    - macos-10.15
+                    - ubuntu-20.04
+                ocaml-version:
+                    - '4.10.0+flambda'
+        runs-on: ${{ matrix.os }}
         steps:
             - uses: actions/checkout@v2.0.0
-            - uses: avsm/setup-ocaml@v1.0
+              with:
+                  submodules: recursive
+            - uses: avsm/setup-ocaml@v1.0.1
               with:
                   ocaml-version: ${{ matrix.ocaml-version }}
-            - uses: actions/cache@v1.1.2
+            - uses: actions/cache@v2.1.1
               with:
                   path: ~/.opam/download-cache/
                   key: ${{ runner.os }}-ocaml-opam-${{ hashFiles('dune-project') }}
                   restore-keys: ${{ runner.os }}-ocaml-opam-
             - run: make dep
             - run: make coverage
-            - uses: codecov/codecov-action@v1.0.5
+            - uses: codecov/codecov-action@v1.0.13
               with:
                   token: ${{ secrets.CODECOV_TOKEN }}
                   file: ./_coverage/coverage.json
