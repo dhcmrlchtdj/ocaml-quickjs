@@ -4,5 +4,5 @@
  (archive_name quickjs)
  (language c)
  (names quickjs libregexp libunicode cutils quickjs-libc libbf)
- (flags -D_GNU_SOURCE "-DCONFIG_VERSION=\"2020-09-06\"" -DCONFIG_BIGNUM
+ (flags -D_GNU_SOURCE "-DCONFIG_VERSION=\"2020-11-08\"" -DCONFIG_BIGNUM
    :standard))

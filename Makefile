@@ -38,4 +38,12 @@ install: release
 uninstall: release
 	opam remove .
 
+upgrade_quickjs:
+	cd ./vendor/quickjs && git pull
+	sed -i.bak -E \
+		-e "s/-DCONFIG_VERSION=\\\\\"[^\"]+\\\\\"/-DCONFIG_VERSION=\\\\\"`cat vendor/quickjs/VERSION`\\\\\"/" \
+		vendor/dune gen/constants.ml
+	rm vendor/dune.bak
+	rm gen/constants.ml.bak
+
 .PHONY: build test clean fmt doc release install uninstall test_update coverage dep

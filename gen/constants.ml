@@ -27,7 +27,7 @@ let () =
           ~c_flags:
             [
               "-D_GNU_SOURCE";
-              "-DCONFIG_VERSION=\"2020-09-06\"";
+              "-DCONFIG_VERSION=\"2020-11-08\"";
               "-DCONFIG_BIGNUM";
               include_quickjs;
             ]
