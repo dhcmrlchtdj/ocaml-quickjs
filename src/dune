@@ -3,16 +3,16 @@
  (name quickjs)
  (modules quickjs)
  (libraries quickjs_raw ctypes)
- (preprocess
-  (pps bisect_ppx --conditional)))
+ (instrumentation
+  (backend bisect_ppx)))
 
 (library
  (public_name quickjs.raw)
  (name quickjs_raw)
  (modules quickjs_raw stubs)
  (libraries bindings)
- (preprocess
-  (pps bisect_ppx --conditional))
+ (instrumentation
+  (backend bisect_ppx))
  (foreign_archives ../vendor/quickjs)
  (foreign_stubs
   (language c)

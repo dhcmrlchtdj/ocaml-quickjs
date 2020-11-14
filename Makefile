@@ -7,14 +7,14 @@ release:
 	opam exec dune -- build @install --profile=release
 
 test:
-	OCAMLRUNPARAM=b opam exec dune -- runtest
+	OCAMLRUNPARAM=b opam exec dune -- runtest --instrument-with bisect_ppx
 
 test_update:
-	-opam exec dune -- runtest --auto-promote
+	-opam exec dune -- runtest --auto-promote --instrument-with bisect_ppx
 
 coverage:
 	opam exec dune -- clean
-	OCAMLRUNPARAM=b BISECT_ENABLE=yes opam exec dune -- runtest
+	OCAMLRUNPARAM=b opam exec dune -- runtest --instrument-with bisect_ppx
 	opam exec bisect-ppx-report -- coveralls _coverage/coverage.json
 	opam exec bisect-ppx-report -- html
 	opam exec bisect-ppx-report -- summary
