@@ -41,7 +41,7 @@ uninstall: release
 upgrade_quickjs:
 	cd ./vendor/quickjs && git pull
 	sed -i.bak -E \
-		-e "s/-DCONFIG_VERSION=\\\\\"[^\"]+\\\\\"/-DCONFIG_VERSION=\\\\\"`cat vendor/quickjs/VERSION`\\\\\"/" \
+		-e "s/-DCONFIG_VERSION=\\\\\"[-0-9]+\\\\\"/-DCONFIG_VERSION=\\\\\"$(shell cat vendor/quickjs/VERSION)\\\\\"/" \
 		vendor/dune gen/constants.ml
 	rm vendor/dune.bak
 	rm gen/constants.ml.bak
