@@ -20,7 +20,6 @@ jobs:
             - uses: avsm/setup-ocaml@v2
               with:
                   ocaml-compiler: ${{ matrix.ocaml-compiler }}
-                  opam-depext-flags: --with-test
             - uses: actions/cache@v2.1.2
               with:
                   path: ~/.opam/download-cache/
