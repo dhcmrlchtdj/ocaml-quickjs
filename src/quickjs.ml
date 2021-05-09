@@ -100,15 +100,13 @@ let disable_bignum_ext (ctx : context) = C.js_enable_bignum_ext ctx.ctx 0
 
 type js_func = context -> value -> value list -> value
 
-let add_func (ctx : context) (func : js_func) (name : string) (argc : int)
-    : value or_js_exn
-  =
+let add_func (ctx : context) (func : js_func) (name : string) (argc : int) :
+    value or_js_exn =
   let cfunc
       (_ : C.js_context Ctypes.ptr)
       (this : C.js_value)
       (len : int)
-      (value_ptr : C.js_value Ctypes.ptr)
-    =
+      (value_ptr : C.js_value Ctypes.ptr) =
     let rec build_args args len arg_ptr =
       if len = 0
       then List.rev args
@@ -216,9 +214,9 @@ module Value = struct
     let bool o : bool or_js_exn =
       let r = C.js_to_bool o.ctx.ctx o.jsval in
       match r with
-        | -1 -> Error (get_exception o.ctx)
-        | 0 -> Ok false
-        | _ -> Ok true
+      | -1 -> Error (get_exception o.ctx)
+      | 0 -> Ok false
+      | _ -> Ok true
 
     let to_xxx o ptr set_ptr =
       let xxx = set_ptr o.ctx.ctx ptr o.jsval in
@@ -268,9 +266,7 @@ let raw_eval
     (typ : eval_type option)
     (flags : eval_flag list option)
     (ctx : context option)
-    (script : string)
-    : value
-  =
+    (script : string) : value =
   let build_flag typ flags compile_only =
     let f = get_flag typ in
     let f = if compile_only then f lor get_flag `COMPILE_ONLY else f in
@@ -279,8 +275,8 @@ let raw_eval
   in
   let get_or_default default opt =
     match opt with
-      | Some x -> x
-      | None -> Lazy.force default
+    | Some x -> x
+    | None -> Lazy.force default
   in
   let typ = get_or_default (lazy `GLOBAL) typ in
   let flags = get_or_default (lazy []) flags in
@@ -294,27 +290,21 @@ let eval_unsafe
     ?(typ : eval_type option)
     ?(flags : eval_flag list option)
     ?(ctx : context option)
-    (script : string)
-    : value
-  =
+    (script : string) : value =
   raw_eval false typ flags ctx script
 
 let eval
     ?(typ : eval_type option)
     ?(flags : eval_flag list option)
     ?(ctx : context option)
-    (script : string)
-    : value or_js_exn
-  =
+    (script : string) : value or_js_exn =
   check_exception (raw_eval false typ flags ctx script)
 
 let compile
     ?(typ : eval_type option)
     ?(flags : eval_flag list option)
     ?(ctx : context option)
-    (script : string)
-    : bytecode or_js_exn
-  =
+    (script : string) : bytecode or_js_exn =
   let o = raw_eval true typ flags ctx script in
   let o = check_exception o in
   Stdlib.Result.map (fun o -> build_bytecode o.ctx o.jsval) o

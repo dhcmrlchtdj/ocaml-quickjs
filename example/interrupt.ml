@@ -28,5 +28,5 @@ let _ =
   in
   let r = Quickjs.eval ~ctx fib in
   match r with
-    | Ok _ -> assert false
-    | Error e -> print_endline (Quickjs.Value.To.string e |> Option.get)
+  | Ok _ -> assert false
+  | Error e -> print_endline (Quickjs.Value.To.string e |> Option.get)

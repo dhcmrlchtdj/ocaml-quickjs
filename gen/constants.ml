@@ -8,9 +8,10 @@ let () =
       (fun (k, v) ->
         let write_ml = Printf.fprintf out "let define_%s = %s;;\n" in
         match v with
-          | C_define.Value.Switch b -> write_ml k (string_of_bool b)
-          | C_define.Value.Int n -> write_ml k (string_of_int n)
-          | C_define.Value.String s -> write_ml k s)
+        | C_define.Value.Switch b -> write_ml k (string_of_bool b)
+        | C_define.Value.Int n -> write_ml k (string_of_int n)
+        | C_define.Value.String s -> write_ml k s
+        )
       result;
     flush out;
     close_out out
@@ -46,4 +47,5 @@ let () =
             ("JS_EVAL_FLAG_BACKTRACE_BARRIER", C_define.Type.Int);
           ]
       in
-      write_constants result)
+      write_constants result
+  )

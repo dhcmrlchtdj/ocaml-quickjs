@@ -190,24 +190,20 @@ type eval_flag =
   ]
 
 (** [eval ~typ ~flags ~ctx script] *)
-val eval
-  :  ?typ:eval_type ->
+val eval :
+  ?typ:eval_type ->
   ?flags:eval_flag list ->
   ?ctx:context ->
   string ->
   value or_js_exn
 
 (** [eval_unsafe ~typ ~flags ~ctx script], you must check exception by yourself. {!val:check_exception} *)
-val eval_unsafe
-  :  ?typ:eval_type ->
-  ?flags:eval_flag list ->
-  ?ctx:context ->
-  string ->
-  value
+val eval_unsafe :
+  ?typ:eval_type -> ?flags:eval_flag list -> ?ctx:context -> string -> value
 
 (** [compile ~typ ~flags ~ctx script] *)
-val compile
-  :  ?typ:eval_type ->
+val compile :
+  ?typ:eval_type ->
   ?flags:eval_flag list ->
   ?ctx:context ->
   string ->

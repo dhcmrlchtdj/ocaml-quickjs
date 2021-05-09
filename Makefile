@@ -1,5 +1,7 @@
 SHELL := bash
 
+.PHONY: build release test test_update coverage clean fmt doc dep install uninstall upgrade_quickjs
+
 build:
 	opam exec dune -- build @install --profile=dev
 
@@ -7,10 +9,10 @@ release:
 	opam exec dune -- build @install --profile=release
 
 test:
-	OCAMLRUNPARAM=b opam exec dune -- runtest --instrument-with bisect_ppx
+	OCAMLRUNPARAM=b opam exec dune -- runtest
 
 test_update:
-	-opam exec dune -- runtest --auto-promote --instrument-with bisect_ppx
+	-opam exec dune -- runtest --auto-promote
 
 coverage:
 	opam exec dune -- clean
@@ -21,6 +23,7 @@ coverage:
 
 clean:
 	opam exec dune -- clean
+	rm -rf ./_coverage
 
 fmt:
 	-opam exec dune -- build @fmt --auto-promote
@@ -45,5 +48,3 @@ upgrade_quickjs:
 		vendor/dune gen/constants.ml
 	rm vendor/dune.bak
 	rm gen/constants.ml.bak
-
-.PHONY: build test clean fmt doc release install uninstall test_update coverage dep

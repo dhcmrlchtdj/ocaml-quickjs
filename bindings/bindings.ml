@@ -661,7 +661,8 @@ module Make (F : Cstubs.FOREIGN) = struct
         @-> js_value_const
         @-> int
         @-> ptr js_value_const
-        @-> returning js_value)
+        @-> returning js_value
+      )
 
   let js_new_c_function =
     (* JSValue JS_NewCFunction(JSContext *ctx, JSCFunction *func, const char *name, int length) *)
